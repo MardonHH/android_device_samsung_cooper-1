@@ -28,7 +28,7 @@ DEVICE_PACKAGE_OVERLAYS += device/samsung/cooper/overlay
 PRODUCT_PACKAGES += \
     libOmxCore \
     libmm-omxcore \
-    libstagefrighthw 
+    libstagefrighthw
 
 ## Display
 PRODUCT_PACKAGES += \
@@ -50,16 +50,16 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libcamera \
     camera.cooper \
-    LegacyCamera 
+    LegacyCamera
 
-#Other 
+#Other
 PRODUCT_PACKAGES += \
     make_ext4fs \
     brcm_patchram_plus \
     bdaddr_read \
     setup_fs \
     librpc \
-    FileManager 
+    FileManager
 
 ## Vold config
 PRODUCT_COPY_FILES += \
@@ -74,7 +74,7 @@ PRODUCT_COPY_FILES += \
    device/samsung/cooper/prebuilt/system/lib/liboemcamera.so:system/lib/liboemcamera.so \
    device/samsung/cooper/prebuilt/system/lib/libarccamera.so:system/lib/libarccamera.so
 
-## Hardware properties 
+## Hardware properties
 PRODUCT_COPY_FILES += \
     frameworks/base/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
     frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
@@ -122,14 +122,14 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/bin/hostapd:system/bin/hostapd \
     device/samsung/cooper/prebuilt/system/bin/wlan_mac:system/bin/wlan_mac \
     device/samsung/cooper/prebuilt/system/bin/wlan_tool:system/bin/wlan_tool \
-    device/samsung/cooper/prebuilt/system/bin/wmiconfig:system/bin/wmiconfig 
+    device/samsung/cooper/prebuilt/system/bin/wmiconfig:system/bin/wmiconfig
 
 ## Wifi Stuff
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
     device/samsung/cooper/prebuilt/system/etc/wifi/hostapd.conf:system/etc/wifi/hostapd.conf \
     device/samsung/cooper/prebuilt/system/etc/wifi/dhcpcd.conf:system/etc/wifi/dhcpcd.conf \
-    device/samsung/cooper/prebuilt/system/etc/dhcpcd/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf 
+    device/samsung/cooper/prebuilt/system/etc/dhcpcd/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf
 
 ## Media
 PRODUCT_COPY_FILES += \
@@ -139,7 +139,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/etc/audio_effects.conf:system/etc/audio_effects.conf \
     device/samsung/cooper/prebuilt/system/etc/hosts:system/etc/hosts \
     device/samsung/cooper/prebuilt/system/etc/sysctl.conf:system/etc/sysctl.conf \
-    device/samsung/cooper/prebuilt/system/etc/media_profiles.xml:system/etc/media_profiles.xml 
+    device/samsung/cooper/prebuilt/system/etc/media_profiles.xml:system/etc/media_profiles.xml
 
 ## keymap
 PRODUCT_COPY_FILES += \
@@ -147,7 +147,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/usr/keylayout/sec_jack.kl:system/usr/keylayout/sec_jack.kl \
     device/samsung/cooper/prebuilt/system/usr/keylayout/Generic.kl:system/usr/keylayout/Generic.kl \
     device/samsung/cooper/prebuilt/system/usr/keylayout/AVRCP.kl:system/usr/keylayout/AVRCP.kl \
-    device/samsung/cooper/prebuilt/system/usr/keylayout/sec_key.kl:system/usr/keylayout/sec_key.kl 
+    device/samsung/cooper/prebuilt/system/usr/keylayout/sec_key.kl:system/usr/keylayout/sec_key.kl
 
 ## keychar
 PRODUCT_COPY_FILES += \
@@ -172,7 +172,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/hw/sensors.default.so:system/lib/hw/sensors.default.so \
     device/samsung/cooper/prebuilt/system/bin/qmuxd:system/bin/qmuxd \
     device/samsung/cooper/prebuilt/system/bin/gpsd:system/vendor/bin/gpsd \
-    device/samsung/cooper/prebuilt/system/bin/memsicd:system/bin/memsicd 
+    device/samsung/cooper/prebuilt/system/bin/memsicd:system/bin/memsicd
 
 ## 3D
 PRODUCT_COPY_FILES += \
@@ -185,7 +185,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libC2D2.so:system/lib/libC2D2.so \
     device/samsung/cooper/prebuilt/system/lib/libsc-a2xx.so:system/lib/libsc-a2xx.so \
     device/samsung/cooper/prebuilt/system/lib/libOpenVG.so:system/lib/libOpenVG.so \
-    device/samsung/cooper/prebuilt/system/lib/egl/egl.cfg:system/lib/egl/egl.cfg 
+    device/samsung/cooper/prebuilt/system/lib/egl/egl.cfg:system/lib/egl/egl.cfg
 
 ## GPU firmware
 PRODUCT_COPY_FILES += \
@@ -201,7 +201,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libdiag.so:system/lib/libdiag.so \
     device/samsung/cooper/prebuilt/system/lib/libsec-ril.so:system/lib/libsec-ril.so \
     device/samsung/cooper/prebuilt/system/lib/libsecril-client.so:system/lib/libsecril-client.so \
-    device/samsung/cooper/prebuilt/system/lib/libril.so:system/lib/libril.so 
+    device/samsung/cooper/prebuilt/system/lib/libril.so:system/lib/libril.so
 
 # Misc packages
 PRODUCT_PACKAGES += \
@@ -221,7 +221,7 @@ PRODUCT_LOCALES += en
 PRODUCT_AAPT_CONFIG := normal ldpi mdpi
 PRODUCT_AAPT_PREF_CONFIG := mdpi
 
-$(call inherit-product, build/target/product/full_base_cheshire.mk)
+$(call inherit-product, full_base.mk)
 
 # Misc properties
 # events_per_sec: default 90
