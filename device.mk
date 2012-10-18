@@ -1,4 +1,4 @@
-# Copyright (C) 2009 The Android Open Source Project
+\# Copyright (C) 2009 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -221,7 +221,7 @@ PRODUCT_LOCALES += en
 PRODUCT_AAPT_CONFIG := normal ldpi mdpi
 PRODUCT_AAPT_PREF_CONFIG := mdpi
 
-$(call inherit-product, full_base.mk)
+$(call inherit-product, device/samsung/cooper/full_base.mk)
 
 # Misc properties
 # events_per_sec: default 90

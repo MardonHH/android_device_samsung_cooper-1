@@ -49,4 +49,4 @@ $(call inherit-product-if-exists, external/svox/pico/lang/PicoLangDefaultInSyste
 $(call inherit-product, $(SRC_TARGET_DIR)/product/locales_full.mk)
 
 # Get everything else from the parent package
-$(call inherit-product, generic_no_telephony.mk)
+$(call inherit-product, device/samsung/cooper/generic_no_telephony.mk)
