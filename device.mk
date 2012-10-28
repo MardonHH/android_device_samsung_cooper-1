@@ -193,6 +193,8 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/bin/gpsd:system/vendor/bin/gpsd \
     device/samsung/cooper/prebuilt/system/bin/memsicd:system/bin/memsicd
 
+
+
 ## 3D
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/egl/libGLESv1_CM_adreno200.so:system/lib/egl/libGLESv1_CM_adreno200.so \
@@ -211,9 +213,12 @@ PRODUCT_COPY_FILES += \
 	device/samsung/cooper/prebuilt/system/etc/firmware/yamato_pm4.fw:system/etc/firmware/yamato_pm4.fw \
 	device/samsung/cooper/prebuilt/system/etc/firmware/yamato_pfp.fw:system/etc/firmware/yamato_pfp.fw
 
-## other media
+## Other
 PRODUCT_COPY_FILES += \
-    device/samsung/cooper/prebuilt/system/bin/get_macaddrs:system/bin/get_macaddrs
+    device/samsung/cooper/prebuilt/system/bin/get_macaddrs:system/bin/get_macaddrs \
+    device/samsung/cooper/prebuilt/system/lib/hw/gps.msm7x27.so:system/lib/hw/gps.msm7x27.so \
+    device/samsung/cooper/prebuilt/system/lib/hw/lights.msm7x27.so:system/lib/hw/lights.msm7x27.so \
+
 
 ## ril
 PRODUCT_COPY_FILES += \
