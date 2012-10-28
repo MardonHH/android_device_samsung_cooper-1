@@ -127,6 +127,8 @@
 #define VOC_REC_DOWNLINK	0x01
 #define VOC_REC_BOTH		0x02
 
+#define SND_SET_MAIN_MIC       _IOW(SND_IOCTL_MAGIC, 9, int *)
+
 struct msm_audio_config {
 	uint32_t buffer_size;
 	uint32_t buffer_count;

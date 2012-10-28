@@ -118,6 +118,7 @@ AudioHardware::AudioHardware() :
         if (rc >= 0) {
             mSndEndpoints = new msm_snd_endpoint[mNumSndEndpoints];
             mInit = true;
+            ioctl(m7xsnddriverfd, SND_SET_MAIN_MIC);
             LOGV("constructed (%d SND endpoints)", rc);
             struct msm_snd_endpoint *ept = mSndEndpoints;
             for (int cnt = 0; cnt < mNumSndEndpoints; cnt++, ept++) {
