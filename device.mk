@@ -188,8 +188,7 @@ PRODUCT_COPY_FILES += \
 ## Sensor
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/bin/gpsd:system/bin/gpsd \
-##    device/samsung/cooper/prebuilt/system/lib/hw/gps.msm7x27.so:system/lib/hw/gps.msm7x27.so \
-    device/samsung/cooper/prebuilt/system/lib/hw/sensors.default.so:system/lib/hw/sensors.default.so \
+    device/samsung/cooper/prebuilt/system/lib/hw/sensors.cooper.so:system/lib/hw/sensors.cooper.so \
     device/samsung/cooper/prebuilt/system/bin/qmuxd:system/bin/qmuxd \
     device/samsung/cooper/prebuilt/system/bin/gpsd:system/vendor/bin/gpsd \
     device/samsung/cooper/prebuilt/system/bin/memsicd:system/bin/memsicd
