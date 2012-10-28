@@ -141,6 +141,26 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/etc/sysctl.conf:system/etc/sysctl.conf \
     device/samsung/cooper/prebuilt/system/etc/media_profiles.xml:system/etc/media_profiles.xml
 
+## Omx
+PRODUCT_COPY_FILES += \
+    device/samsung/cooper/prebuilt/system/lib/libOmxWmvDec.so:system/lib/libOmxWmvDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxWmaDec.so:system/lib/libOmxWmaDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxVidEnc.so:system/lib/libOmxVidEnc.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxQcelpDec.so:system/lib/libOmxQcelpDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxQcelp13Enc.so:system/lib/libOmxQcelp13Enc.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxMpeg4Dec.so:system/lib/libOmxMpeg4Dec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxMp3Dec.so:system/lib/libOmxMp3Dec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxH264Dec.so:system/lib/libOmxH264Dec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxEvrcEnc.so:system/lib/libOmxEvrcEnc.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxEvrcDec.so:system/lib/libOmxEvrcDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxCore.so:system/lib/libOmxCore.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxAmrwbDec.so:system/lib/libOmxAmrwbDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxAmrRtpDec.so:system/lib/libOmxAmrRtpDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxAmrEnc.so:system/lib/libOmxAmrEnc.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxAmrDec.so:system/lib/libOmxAmrDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxAacEnc.so:system/lib/libOmxAacEnc.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxAacDec.so:system/lib/libOmxAacDec.so
+
 ## keymap
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/usr/keylayout/qwerty.kl:system/usr/keylayout/qwerty.kl \
