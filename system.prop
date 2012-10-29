@@ -7,6 +7,7 @@ ro.opengles.version=131072
 ro.sf.lcd_density=160
 video.accelerate.hw=1
 persist.sys.use_dithering=2
+com.qc.hardware=true
 
 # RIL, telephony
 rild.libpath=/system/lib/libsec-ril.so
@@ -61,3 +62,4 @@ dev.sfbootcomplete=0
 ro.com.google.locationfeatures=1
 ro.setupwizard.enable_bypass=1
 ro.config.play.bootsound=0
+ro.com.android.wifi-watchlist=GoogleGuest
