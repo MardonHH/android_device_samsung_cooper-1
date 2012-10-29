@@ -34,7 +34,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     gralloc.msm7x27 \
     hwcomposer.msm7x27 \
-    gps.msm7x27 \
     libgenlock \
     liboverlay \
     libtilerenderer \
