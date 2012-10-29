@@ -61,7 +61,6 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
         }
         // when in call, DTMF and PHONE strategies follow the same rules
         // FALL THROUGH
-
     case STRATEGY_PHONE:
         // for phone strategy, we first consider the forced use and then the available devices by order
         // of priority
@@ -131,6 +130,16 @@ uint32_t AudioPolicyManager::getDeviceForStrategy(routing_strategy strategy, boo
             device = getDeviceForStrategy(STRATEGY_PHONE, false);
             break;
         }
+        device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_SPEAKER;
+        if (device == 0) {
+            LOGE("getDeviceForStrategy() speaker device not found");
+        }
+        // The second device used for sonification is the same as the device used by media strategy
+        // FALL THROUGH
+	case STRATEGY_ENFORCED_AUDIBLE:
+        // strategy STRATEGY_ENFORCED_AUDIBLE uses same routing policy as STRATEGY_SONIFICATION
+        // except when in call where it doesn't default to STRATEGY_PHONE behavior
+
         device = mAvailableOutputDevices & AudioSystem::DEVICE_OUT_SPEAKER;
         if (device == 0) {
             LOGE("getDeviceForStrategy() speaker device not found");
