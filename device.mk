@@ -153,7 +153,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libOmxH264Dec.so:system/lib/libOmxH264Dec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxEvrcEnc.so:system/lib/libOmxEvrcEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxEvrcDec.so:system/lib/libOmxEvrcDec.so \
-    device/samsung/cooper/prebuilt/system/lib/libOmxCore.so:system/lib/libOmxCore.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrwbDec.so:system/lib/libOmxAmrwbDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrRtpDec.so:system/lib/libOmxAmrRtpDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrEnc.so:system/lib/libOmxAmrEnc.so \
@@ -217,7 +216,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/bin/get_macaddrs:system/bin/get_macaddrs \
     device/samsung/cooper/prebuilt/system/lib/hw/gps.msm7x27.so:system/lib/hw/gps.msm7x27.so \
-    device/samsung/cooper/prebuilt/system/lib/hw/lights.msm7x27.so:system/lib/hw/lights.msm7x27.so \
+    device/samsung/cooper/prebuilt/system/lib/hw/lights.msm7x27.so:system/lib/hw/lights.msm7x27.so
 
 
 ## ril
