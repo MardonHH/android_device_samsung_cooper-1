@@ -158,7 +158,17 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrEnc.so:system/lib/libOmxAmrEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrDec.so:system/lib/libOmxAmrDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAacEnc.so:system/lib/libOmxAacEnc.so \
-    device/samsung/cooper/prebuilt/system/lib/libOmxAacDec.so:system/lib/libOmxAacDec.so
+    device/samsung/cooper/prebuilt/system/lib/libOmxAacDec.so:system/lib/libOmxAacDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxVidEnc.so:system/lib/libOmxVidEnc.so \
+    device/samsung/cooper/prebuilt/system/lib/libmm-adspsvc.so:system/lib/libmm-adspsvc.so \
+    device/samsung/cooper/prebuilt/system/lib/libomx_aacdec_sharedlibrary.so:system/lib/libomx_aacdec_sharedlibrary.so \
+    device/samsung/cooper/prebuilt/system/lib/libomx_amrdec_sharedlibrary.so:system/lib/libomx_amrdec_sharedlibrary.so \
+    device/samsung/cooper/prebuilt/system/lib/libomx_amrenc_sharedlibrary.so:system/lib/libomx_amrenc_sharedlibrary.so \
+    device/samsung/cooper/prebuilt/system/lib/libomx_avcdec_sharedlibrary.so:system/lib/libomx_avcdec_sharedlibrary.so \
+    device/samsung/cooper/prebuilt/system/lib/libomx_m4vdec_sharedlibrary.so:system/lib/libomx_m4vdec_sharedlibrary.so \
+    device/samsung/cooper/prebuilt/system/lib/libomx_mp3dec_sharedlibrary.so:system/lib/libomx_mp3dec_sharedlibrary.so \
+    device/samsung/cooper/prebuilt/system/lib/libomx_sharedlibrary.so:system/lib/libomx_sharedlibrary.so
+
 
 ## keymap
 PRODUCT_COPY_FILES += \
@@ -191,8 +201,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/bin/qmuxd:system/bin/qmuxd \
     device/samsung/cooper/prebuilt/system/bin/gpsd:system/vendor/bin/gpsd \
     device/samsung/cooper/prebuilt/system/bin/memsicd:system/bin/memsicd
-
-
 
 ## 3D
 PRODUCT_COPY_FILES += \
