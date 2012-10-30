@@ -244,8 +244,6 @@ PRODUCT_LOCALES += en
 PRODUCT_AAPT_CONFIG := normal ldpi mdpi
 PRODUCT_AAPT_PREF_CONFIG := mdpi
 
-$(call inherit-product, device/samsung/cooper/full_base.mk)
-
 # Misc properties
 # events_per_sec: default 90
 PRODUCT_PROPERTY_OVERRIDES += \

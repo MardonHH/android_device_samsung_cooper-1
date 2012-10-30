@@ -20,7 +20,32 @@
 #
 
 # Inherit from those products. Most specific first.
-$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
+PRODUCT_PACKAGES := \
+    drmserver \
+    libdrmframework \
+    libdrmframework_jni \
+    libfwdlockengine \
+    WAPPushManager
+
+# Additional settings used in all AOSP builds
+PRODUCT_PROPERTY_OVERRIDES := \
+    ro.com.android.dateformat=MM-dd-yyyy
+
+# Put en_US first in the list, so make it default.
+PRODUCT_LOCALES := en_US
+
+# Get some sounds
+$(call inherit-product-if-exists, frameworks/base/data/sounds/AllAudio.mk)
+
+# Get the TTS language packs
+$(call inherit-product-if-exists, external/svox/pico/lang/PicoLangDefaultInSystem.mk)
+
+# Get a list of languages.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/locales_full.mk)
+
+# Get everything else from the parent package
+$(call inherit-product, device/samsung/cooper/generic_no_telephony.mk)
+
 # This is where we'd set a backup provider if we had one
 #$(call inherit-product, device/sample/products/backup_overlay.mk)
 $(call inherit-product, device/samsung/cooper/device.mk)
