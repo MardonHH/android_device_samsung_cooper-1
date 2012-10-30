@@ -21,4 +21,4 @@
 # function: add_lunch_combo generic-eng
 
 
-add_lunch_combo cm_cooper-user
+add_lunch_combo cm_cooper-userdebug

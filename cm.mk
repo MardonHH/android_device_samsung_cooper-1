@@ -1,15 +1,8 @@
-TARGET_BOOTANIMATION_NAME := mdpi
-
 ## Specify phone tech before including full_phone
 $(call inherit-product, vendor/cm/config/gsm.mk)
 
 # Inherit some common CM stuff.
 PRODUCT_BRAND ?= cyanogenmod
-
-ifneq ($(TARGET_BOOTANIMATION_NAME),)
-    PRODUCT_COPY_FILES += \
-        vendor/cm/prebuilt/common/bootanimation/$(TARGET_BOOTANIMATION_NAME).zip:system/media/bootanimation.zip
-endif
 
 ifdef CM_NIGHTLY
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -58,7 +51,6 @@ PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/bin/handle_compcache:system/bin/handle_compcache
 
 PRODUCT_COPY_FILES +=  \
-    vendor/cm/proprietary/RomManager.apk:system/app/RomManager.apk \
     vendor/cm/proprietary/Term.apk:system/app/Term.apk \
     vendor/cm/proprietary/lib/armeabi/libjackpal-androidterm4.so:system/lib/libjackpal-androidterm4.so \
     vendor/cm/prebuilt/common/apps/Superuser.apk:system/app/Superuser.apk
