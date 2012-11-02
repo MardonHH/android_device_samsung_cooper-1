@@ -39,7 +39,6 @@ TARGET_SPECIFIC_HEADER_PATH += device/samsung/cooper/include
 # against the traditional rules of inheritance).
 # for now
 USE_CAMERA_STUB := false
-BOARD_USE_FROYO_LIBCAMERA := true
 
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
@@ -48,7 +47,6 @@ TARGET_PROVIDES_LIBRIL := device/samsung/cooper/prebuilt/system/lib/libril.so
 TARGET_PREBUILT_RECOVERY_KERNEL := device/samsung/cooper/recovery_kernel
 TARGET_RECOVERY_INITRC := device/samsung/cooper/recovery.rc
 TARGET_BOARD_PLATFORM := msm7x27
-# TARGET_BOARD_PLATFORM := msm7k
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv6-vfp
 TARGET_CPU_ABI := armeabi-v6l
@@ -134,7 +132,6 @@ BOARD_UMS_LUNFILE := "/sys/devices/platform/usb_mass_storage/lun0/file"
 TARGET_USE_CUSTOM_LUN_FILE_PATH  := "/sys/devices/platform/usb_mass_storage/lun0/file"
 
 DISABLE_DEXPREOPT := true
-COPYBIT_MSM7K := false
 BOARD_USE_LEGACY_TOUCHSCREEN := true
 
 TARGET_HAVE_BYPASS := false
