@@ -75,6 +75,7 @@ PRODUCT_COPY_FILES += \
    device/samsung/cooper/prebuilt/system/lib/libcamera.so:system/lib/libcamera.so \
    device/samsung/cooper/prebuilt/system/lib/libs3cjpeg.so:system/lib/libs3cjpeg.so \
    device/samsung/cooper/prebuilt/system/lib/liboemcamera.so:system/lib/liboemcamera.so \
+   device/samsung/cooper/prebuilt/system/lib/libmmosal.so:system/lib/libmmosal.so \
    device/samsung/cooper/prebuilt/system/lib/libmmparser_divxdrmlib.so:system/lib/libmmparser_divxdrmlib.so \
    device/samsung/cooper/prebuilt/system/lib/libmmparser.so:system/lib/libmmparser.so
 
