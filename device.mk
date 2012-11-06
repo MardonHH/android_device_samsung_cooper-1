@@ -28,6 +28,7 @@ DEVICE_PACKAGE_OVERLAYS += device/samsung/cooper/overlay
 PRODUCT_PACKAGES += \
     libOmxCore \
     libmm-omxcore \
+    libOmxVidEnc \
     libstagefrighthw
 
 ## Display
@@ -52,8 +53,9 @@ PRODUCT_PACKAGES += \
     camera.cooper \
     LegacyCamera
 
-#Other
+# Other
 PRODUCT_PACKAGES += \
+    gps.cooper \
     make_ext4fs \
     brcm_patchram_plus \
     bdaddr_read \
@@ -65,14 +67,15 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/etc/vold.fstab:system/etc/vold.fstab
 
-##Camera
+## Camera and media
 PRODUCT_COPY_FILES += \
    device/samsung/cooper/prebuilt/system/lib/libmmipl.so:system/lib/libmmipl.so \
    device/samsung/cooper/prebuilt/system/lib/libmmjpeg.so:system/lib/libmmjpeg.so \
    device/samsung/cooper/prebuilt/system/lib/libcamera.so:system/lib/libcamera.so \
    device/samsung/cooper/prebuilt/system/lib/libs3cjpeg.so:system/lib/libs3cjpeg.so \
    device/samsung/cooper/prebuilt/system/lib/liboemcamera.so:system/lib/liboemcamera.so \
-   device/samsung/cooper/prebuilt/system/lib/libarccamera.so:system/lib/libarccamera.so
+   device/samsung/cooper/prebuilt/system/lib/libmmparser_divxdrmlib.so:system/lib/libmmparser_divxdrmlib.so \
+   device/samsung/cooper/prebuilt/system/lib/libmmparser.so:system/lib/libmmparser.so
 
 ## Hardware properties
 PRODUCT_COPY_FILES += \
@@ -145,7 +148,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libOmxWmvDec.so:system/lib/libOmxWmvDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxWmaDec.so:system/lib/libOmxWmaDec.so \
-    device/samsung/cooper/prebuilt/system/lib/libOmxVidEnc.so:system/lib/libOmxVidEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxQcelpDec.so:system/lib/libOmxQcelpDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxQcelp13Enc.so:system/lib/libOmxQcelp13Enc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxMpeg4Dec.so:system/lib/libOmxMpeg4Dec.so \
@@ -159,7 +161,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrDec.so:system/lib/libOmxAmrDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAacEnc.so:system/lib/libOmxAacEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAacDec.so:system/lib/libOmxAacDec.so \
-    device/samsung/cooper/prebuilt/system/lib/libOmxVidEnc.so:system/lib/libOmxVidEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libmm-adspsvc.so:system/lib/libmm-adspsvc.so \
     device/samsung/cooper/prebuilt/system/lib/libomx_aacdec_sharedlibrary.so:system/lib/libomx_aacdec_sharedlibrary.so \
     device/samsung/cooper/prebuilt/system/lib/libomx_amrdec_sharedlibrary.so:system/lib/libomx_amrdec_sharedlibrary.so \
@@ -223,7 +224,6 @@ PRODUCT_COPY_FILES += \
 ## Other
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/bin/get_macaddrs:system/bin/get_macaddrs \
-    device/samsung/cooper/prebuilt/system/lib/hw/gps.msm7x27.so:system/lib/hw/gps.msm7x27.so \
     device/samsung/cooper/prebuilt/system/lib/hw/lights.msm7x27.so:system/lib/hw/lights.msm7x27.so
 
 
