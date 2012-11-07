@@ -152,17 +152,22 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libOmxWmaDec.so:system/lib/libOmxWmaDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxQcelpDec.so:system/lib/libOmxQcelpDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxQcelp13Enc.so:system/lib/libOmxQcelp13Enc.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxQcelpHwDec.so:system/lib/libOmxQcelpHwDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxMpeg4Dec.so:system/lib/libOmxMpeg4Dec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxMp3Dec.so:system/lib/libOmxMp3Dec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxH264Dec.so:system/lib/libOmxH264Dec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxEvrcEnc.so:system/lib/libOmxEvrcEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxEvrcDec.so:system/lib/libOmxEvrcDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxEvrcHwDec.so:system/lib/libOmxEvrcHwDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrwbDec.so:system/lib/libOmxAmrwbDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxAdpcmDec.so:system/lib/libOmxAdpcmDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrRtpDec.so:system/lib/libOmxAmrRtpDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrEnc.so:system/lib/libOmxAmrEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAmrDec.so:system/lib/libOmxAmrDec.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAacEnc.so:system/lib/libOmxAacEnc.so \
     device/samsung/cooper/prebuilt/system/lib/libOmxAacDec.so:system/lib/libOmxAacDec.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxVidEnc.so:system/lib/libOmxVidEnc.so \
+    device/samsung/cooper/prebuilt/system/lib/libOmxOn2Dec.so:system/lib/libOmxOn2Dec.so \
     device/samsung/cooper/prebuilt/system/lib/libmm-adspsvc.so:system/lib/libmm-adspsvc.so \
     device/samsung/cooper/prebuilt/system/lib/libomx_aacdec_sharedlibrary.so:system/lib/libomx_aacdec_sharedlibrary.so \
     device/samsung/cooper/prebuilt/system/lib/libomx_amrdec_sharedlibrary.so:system/lib/libomx_amrdec_sharedlibrary.so \
