@@ -22,7 +22,7 @@ LOCAL_PATH:= $(call my-dir)
 DEBUG_BIONIC_LIBC := true
 
 TARGET_PROVIDES_INIT_RC := true
-TARGET_KERNEL_CONFIG := nims_defconfig
+TARGET_KERNEL_CONFIG := cyanogenmod_cooper_defconfig
 TARGET_GLOBAL_CFLAGS += -mfpu=vfp -mfloat-abi=softfp -Os
 
 COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DREFRESH_RATE=60

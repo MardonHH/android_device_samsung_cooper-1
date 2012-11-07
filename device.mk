@@ -270,7 +270,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.com.android.dataroaming=false \
 	ro.cm.version=CyanogenMod9.1 \
 	ro.modversion=CyanogenMod9.1 \
-	hwui.render_dirty_regions=false \
 	pm.sleep_mode=1
 
 PRODUCT_COPY_FILES += \
