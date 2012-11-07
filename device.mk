@@ -55,7 +55,6 @@ PRODUCT_PACKAGES += \
 
 # Other
 PRODUCT_PACKAGES += \
-    gps.cooper \
     make_ext4fs \
     brcm_patchram_plus \
     bdaddr_read \
@@ -231,8 +230,8 @@ PRODUCT_COPY_FILES += \
 ## Other
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/bin/get_macaddrs:system/bin/get_macaddrs \
-    device/samsung/cooper/prebuilt/system/lib/hw/lights.msm7x27.so:system/lib/hw/lights.msm7x27.so
-
+    device/samsung/cooper/prebuilt/system/lib/hw/lights.msm7x27.so:system/lib/hw/lights.msm7x27.so \
+    device/samsung/cooper/prebuilt/system/lib/hw/gps.msm7x27.so:system/lib/hw/gps.msm7x27.so
 
 ## ril
 PRODUCT_COPY_FILES += \
