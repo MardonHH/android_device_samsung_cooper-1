@@ -123,9 +123,9 @@ TARGET_USE_CUSTOM_LUN_FILE_PATH  := "/sys/devices/platform/usb_mass_storage/lun0
 DISABLE_DEXPREOPT := true
 BOARD_USE_LEGACY_TOUCHSCREEN := true
 
-TARGET_HAVE_BYPASS := false
+##TARGET_HAVE_BYPASS := false
 
-# BOARD_USE_SKIA_LCDTEXT := true //Tmp remove
+##BOARD_USE_SKIA_LCDTEXT := true
 
 # Recovery
 TARGET_USERIMAGES_USE_EXT4         := true
