@@ -13,22 +13,20 @@
 /dev/block/stl13             0770  root      root
 /dev/block/stl14             0770  root      root
 /dev/block/stl15             0770  root      root
-/dev/rtc1                    0660  system    radio
+
+## VPN
 /dev/ppp                     0660  radio     vpn
 /dev/tun                     0640  vpn       vpn
+
+## Graphics
 /dev/kgsl-3d0                0666  root      root
 /dev/kgsl-2d0                0666  root      root
 /dev/kgsl-2d1                0666  root      root
 /dev/msm_rotator             0660  system    graphics
+/dev/graphics/fb0			 0666  system    graphics
 /dev/genlock                 0777  system    graphics
-/dev/pmem_audio              0660  system    audio
-/dev/pmem_smipool*           0660  system    camera
-/dev/msm_camera				 0660  system    system
-/dev/msm_camera/*			 0660  system    system
-/dev/msm_camera/config0		 0660  system    system 
-/dev/msm_camera/control0	 0660  system    system 
-/dev/msm_camera/frame0		 0660  system    system 
-/dev/msm_hw3dc            	 0666  root      root
+
+## Sensors
 /dev/mmc31xx                 0666  root      system
 /dev/bma_accel               0666  root      system
 /dev/ecompass_ctrl           0666  root      system
@@ -36,24 +34,27 @@
 /dev/proximity               0666  root      system
 /dev/accelerometer           0666  root      system
 /dev/ledflash                0666  root      system
+
+## Camera
+/dev/msm_camera				 0660  system    system
+/dev/msm_camera/*			 0660  system    system
+/dev/msm_camera/config0		 0660  system    system 
+/dev/msm_camera/control0	 0660  system    system 
+/dev/msm_camera/frame0		 0660  system    system 
+
+## DPRAM
 /dev/dpram0                  0660  radio     radio
 /dev/dpram1                  0660  radio     radio
 /dev/dpramerr                0660  radio     radio
-/dev/multipdp                0660  radio     radio
 /dev/ttyCSD0                 0660  radio     radio
 /dev/ttySMD0                 0660  radio     radio
 /dev/ttyGPS0                 0660  system    system
 /dev/ttyXTRA0                0660  system    system
-/proc/LinuStoreIII/efs_info  0664  radio     radio
-/proc/LinuStoreIII/keystr    0664  radio     radio
-/dev/oncrpc/*                0660  root      system
-/dev/radio0                  0640  fm_radio  fm_radio
-/dev/i2c-2                   0660  root      system
-/dev/i2c-4                   0660  root      system
-/dev/msm_voicememo           0660  system    audio
-/dev/qce                     0660  system    audio
-/dev/msm_pcm_lp_dec          0660  system    audio
-/dev/gemini0                 0660  system    system
+
+## Audio
+/dev/pmem_audio              0660  system    audio
+/dev/msm_hw3dc            	 0666  root      root
+/dev/multipdp                0660  radio     radio
 /dev/msm_vidc_reg            0660  system    audio
 /dev/msm_vidc_dec            0660  system    audio
 /dev/msm_vidc_enc            0660  system    audio
@@ -71,4 +72,20 @@
 /dev/msm_preproc_ctl         0660  system    audio
 /dev/msm_a2dp_in             0640  system    audio
 /dev/msm_amrnb_in            0640  system    audio
+
+## Bluetoth
 /dev/ttyHS0		     0666  bluetooth	bluetooth
+
+## Misc
+/dev/oncrpc/*                0660  root      system
+/proc/LinuStoreIII/efs_info  0664  radio     radio
+/proc/LinuStoreIII/keystr    0664  radio     radio
+/dev/pmem_smipool*           0660  system    camera
+/dev/rtc1                    0660  system    radio
+/dev/qce                     0660  system    audio
+/dev/radio0                  0640  fm_radio  fm_radio
+/dev/i2c-2                   0660  root      system
+/dev/i2c-4                   0660  root      system
+/dev/msm_voicememo           0660  system    audio
+/dev/msm_pcm_lp_dec          0660  system    audio
+/dev/gemini0                 0660  system    system
