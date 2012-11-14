@@ -9,13 +9,16 @@ video.accelerate.hw=1
 debug.sf.hw=1
 persist.sys.use_dithering=2
 
-## Qualcomm
+# Qualcomm
 debug.gr.numframebuffers=2
 debug.qctwa.statusbar=1
 debug.qctwa.preservebuf=1
 com.qc.hardware=true
 debug.enabletr=false
 debug.hwui.render_dirty_regions=false
+
+# Camcorder
+debug.camcorder.disablemeta=1
 
 # RIL, telephony
 rild.libpath=/system/lib/libsec-ril.so
@@ -71,3 +74,4 @@ ro.com.google.locationfeatures=1
 ro.setupwizard.enable_bypass=1
 ro.config.play.bootsound=0
 ro.com.android.wifi-watchlist=GoogleGuest
+pm.sleep_mode=1

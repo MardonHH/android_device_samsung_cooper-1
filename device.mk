@@ -266,8 +266,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.com.android.dateformat=MM-dd-yyyy \
 	ro.com.android.dataroaming=false \
 	ro.cm.version=CyanogenMod9.1 \
-	ro.modversion=CyanogenMod9.1 \
-	pm.sleep_mode=1
+	ro.modversion=CyanogenMod9.1
 
 PRODUCT_COPY_FILES += \
 	device/samsung/cooper/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
