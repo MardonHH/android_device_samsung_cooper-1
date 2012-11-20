@@ -370,15 +370,12 @@ int camera_store_meta_data_in_buffers(struct camera_device * device, int enable)
 
 int camera_start_recording(struct camera_device * device)
 {
-    qCamera->enableMsgType(CAMERA_MSG_VIDEO_FRAME);
     return qCamera->startRecording();
 }
 
 void camera_stop_recording(struct camera_device * device)
 {
-    qCamera->disableMsgType(CAMERA_MSG_VIDEO_FRAME);
     qCamera->stopRecording();
-    //qCamera->startPreview();
 }
 
 int camera_recording_enabled(struct camera_device * device)
