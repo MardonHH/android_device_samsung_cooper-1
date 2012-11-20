@@ -195,8 +195,8 @@ struct cm_power_module HAL_MODULE_INFO_SYM = {
     base: {
         common: {
             tag: HARDWARE_MODULE_TAG,
-            module_api_version: POWER_MODULE_API_VERSION_0_2,
-            hal_api_version: HARDWARE_HAL_API_VERSION,
+		    version_major = 1,
+			version_minor = 0,
             id: POWER_HARDWARE_MODULE_ID,
             name: "CM Power HAL",
             author: "The CyanogenMod Project",
