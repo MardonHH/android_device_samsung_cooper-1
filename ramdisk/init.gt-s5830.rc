@@ -77,6 +77,7 @@ on boot
     chown system system /sys/devices/platform/msm_sdcc.4/polling
     chown system system /sys/devices/platform/android_usb/composition
     chown system system /sys/devices/platform/android_usb/remote_wakeup
+	chown system system /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
     mkdir /data/gps 771 gps system
     chown gps system /data/gps
     write /sys/devices/platform/usb_mass_storage/lun0/file /dev/block/mmcblk0p1
