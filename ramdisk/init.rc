@@ -227,7 +227,7 @@ on boot
     setprop net.tcp.buffersize.gprs    4092,8760,11680,4096,8760,11680
     import /system/etc/init.local.rc
     exec /system/bin/sysinit
-    start dbus
+
     class_start default
 
 service ueventd /sbin/ueventd
