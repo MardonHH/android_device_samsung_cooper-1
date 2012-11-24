@@ -49,14 +49,14 @@ static int sysfs_read(char *path, char *s, int num_bytes)
 
     if (fd < 0) {
         strerror_r(errno, buf, sizeof(buf));
-        LOGE("Error opening %s: %s\n", path, buf);
+        ALOGE("Error opening %s: %s\n", path, buf);
 
         return -1;
     }
 
     if ((count = read(fd, s, num_bytes - 1)) < 0) {
         strerror_r(errno, buf, sizeof(buf));
-        LOGE("Error writing to %s: %s\n", path, buf);
+        ALOGE("Error writing to %s: %s\n", path, buf);
 
         ret = -1;
     } else {
@@ -76,14 +76,14 @@ static void sysfs_write(char *path, char *s)
 
     if (fd < 0) {
         strerror_r(errno, buf, sizeof(buf));
-        LOGE("Error opening %s: %s\n", path, buf);
+        ALOGE("Error opening %s: %s\n", path, buf);
         return;
     }
 
     len = write(fd, s, strlen(s));
     if (len < 0) {
         strerror_r(errno, buf, sizeof(buf));
-        LOGE("Error writing to %s: %s\n", path, buf);
+        ALOGE("Error writing to %s: %s\n", path, buf);
     }
 
     close(fd);
@@ -116,7 +116,7 @@ static int boostpulse_open(struct cm_power_module *cm)
 
     if (cm->boostpulse_fd < 0) {
         if (get_scaling_governor(governor, sizeof(governor)) < 0) {
-            LOGE("Can't read scaling governor.");
+            ALOGE("Can't read scaling governor.");
             cm->boostpulse_warned = 1;
         } else {
             if (strncmp(governor, "ondemand", 8) == 0)
@@ -126,10 +126,10 @@ static int boostpulse_open(struct cm_power_module *cm)
 
             if (cm->boostpulse_fd < 0 && !cm->boostpulse_warned) {
                 strerror_r(errno, buf, sizeof(buf));
-                LOGE("Error opening boostpulse: %s\n", buf);
+                ALOGE("Error opening boostpulse: %s\n", buf);
                 cm->boostpulse_warned = 1;
             } else if (cm->boostpulse_fd > 0)
-                LOGD("Opened %s boostpulse interface", governor);
+                ALOGD("Opened %s boostpulse interface", governor);
         }
     }
 
@@ -157,7 +157,7 @@ static void cm_power_hint(struct power_module *module, power_hint_t hint,
 
             if (len < 0) {
                 strerror_r(errno, buf, sizeof(buf));
-	            LOGE("Error writing to boostpulse: %s\n", buf);
+	            ALOGE("Error writing to boostpulse: %s\n", buf);
 
                 pthread_mutex_lock(&cm->lock);
                 close(cm->boostpulse_fd);

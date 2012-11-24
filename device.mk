@@ -25,7 +25,6 @@ DEVICE_PACKAGE_OVERLAYS += device/samsung/cooper/overlay
 PRODUCT_PACKAGES += \
     libOmxCore \
     libmm-omxcore \
-    libOmxVidEnc \
     libstagefrighthw
 
 ## Display
@@ -36,8 +35,7 @@ PRODUCT_PACKAGES += \
     power.msm7x27 \
     libgenlock \
     liboverlay \
-    libtilerenderer \
-    libQcomUI
+    libtilerenderer 
 
 ## Audio
 PRODUCT_PACKAGES += \
@@ -78,21 +76,21 @@ PRODUCT_COPY_FILES += \
 
 ## Hardware properties
 PRODUCT_COPY_FILES += \
-    frameworks/base/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
-    frameworks/base/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
-    frameworks/base/data/etc/android.hardware.location.xml:system/etc/permissions/android.hardware.location.xml \
-    frameworks/base/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
-    frameworks/base/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
-    frameworks/base/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
-    frameworks/base/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
-    frameworks/base/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
-    frameworks/base/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
-    frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-    frameworks/base/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
+    frameworks/native/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
+    frameworks/native/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
+    frameworks/native/data/etc/android.hardware.location.xml:system/etc/permissions/android.hardware.location.xml \
+    frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
+    frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
+    frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
+    frameworks/native/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
+    frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
+    frameworks/native/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
+    frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
+    frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/base/data/etc/platform.xml:system/etc/permissions/platform.xml \
-    frameworks/base/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
-    frameworks/base/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
-    frameworks/base/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
+    frameworks/native/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
+    frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
+    frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
 
 ## Board-specific init
 PRODUCT_COPY_FILES += \
@@ -240,9 +238,6 @@ PRODUCT_PACKAGES += \
 	Torch \
 	Gallery2
 
-## Prebuilt App
-##PRODUCT_COPY_FILES += \
-##    device/samsung/cooper/prebuilt/system/app/UsbMassStorageToggle.apk:system/app/UsbMassStorageToggle.apk
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.rommanager.developerid=cyanogenmod \
@@ -268,29 +263,9 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.modversion=CyanogenMod9.1
 
 PRODUCT_COPY_FILES += \
-	device/samsung/cooper/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip
-
-# Google Apps
-PRODUCT_COPY_FILES += \
-	device/samsung/cooper/prebuilt/system/app/ChromeBookmarksSyncAdapter.apk:system/app/ChromeBookmarksSyncAdapter.apk \
-	device/samsung/cooper/prebuilt/system/app/GenieWidget.apk:system/app/GenieWidget.apk \
-	device/samsung/cooper/prebuilt/system/app/Gmail.apk:system/app/Gmail.apk \
-	device/samsung/cooper/prebuilt/system/app/GoogleBackupTransport.apk:system/app/GoogleBackupTransport.apk \
-	device/samsung/cooper/prebuilt/system/app/GoogleCalendarSyncAdapter.apk:system/app/GoogleCalendarSyncAdapter.apk \
-	device/samsung/cooper/prebuilt/system/app/GoogleContactsSyncAdapter.apk:system/app/GoogleContactsSyncAdapter.apk \
-	device/samsung/cooper/prebuilt/system/app/GoogleLoginService.apk:system/app/GoogleLoginService.apk \
-	device/samsung/cooper/prebuilt/system/app/GooglePartnerSetup.apk:system/app/GooglePartnerSetup.apk \
-	device/samsung/cooper/prebuilt/system/app/GoogleServicesFramework.apk:system/app/GoogleServicesFramework.apk \
-	device/samsung/cooper/prebuilt/system/app/GoogleTTS.apk:system/app/GoogleTTS.apk \
-	device/samsung/cooper/prebuilt/system/app/MarketUpdater.apk:system/app/MarketUpdater.apk \
-	device/samsung/cooper/prebuilt/system/app/MediaUploader.apk:system/app/MediaUploader.apk \
-	device/samsung/cooper/prebuilt/system/app/NetworkLocation.apk:system/app/NetworkLocation.apk \
-	device/samsung/cooper/prebuilt/system/app/OneTimeInitializer.apk:system/app/OneTimeInitializer.apk \
-        device/samsung/cooper/prebuilt/system/app/SetupWizard.apk:system/app/SetupWizard.apk \
+	device/samsung/cooper/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip \
         device/samsung/cooper/prebuilt/system/app/Talk.apk:system/app/Talk.apk \
-	device/samsung/cooper/prebuilt/system/app/PlayStore.apk:system/app/PlayStore.apk \
-        device/samsung/cooper/prebuilt/system/app/VoiceSearch.apk:system/app/VoiceSearch.apk
-
+	device/samsung/cooper/prebuilt/system/app/PlayStore.apk:system/app/PlayStore.apk 
 
 PRODUCT_COPY_FILES += \
         device/samsung/cooper/prebuilt/system/etc/permissions/com.google.android.maps.xml:system/etc/permissions/com.google.android.maps.xml \
@@ -308,8 +283,7 @@ PRODUCT_COPY_FILES += \
         device/samsung/cooper/prebuilt/system/lib/libfrsdk.so:system/lib/libfrsdk.so \
         device/samsung/cooper/prebuilt/system/lib/libgcomm_jni.so:system/lib/libgcomm_jni.so \
         device/samsung/cooper/prebuilt/system/lib/libspeexwrapper.so:system/lib/libspeexwrapper.so \
-        device/samsung/cooper/prebuilt/system/lib/libpicowrapper.so:system/lib/libpicowrapper.so \
-        device/samsung/cooper/prebuilt/system/lib/libvoicesearch.so:system/lib/libvoicesearch.so
+        device/samsung/cooper/prebuilt/system/lib/libpicowrapper.so:system/lib/libpicowrapper.so 
 
 ## GPS
 PRODUCT_COPY_FILES += \
