@@ -96,19 +96,16 @@ PRODUCT_COPY_FILES += \
 
 ## Board-specific init
 PRODUCT_COPY_FILES += \
-    device/samsung/cooper/ramdisk/ueventd.gt-s5830.rc:root/ueventd.gt-s5830.rc \
-    device/samsung/cooper/default.prop:root/default.prop \
     device/samsung/cooper/ramdisk/lib/modules/fsr.ko:root/lib/modules/fsr.ko \
     device/samsung/cooper/ramdisk/lib/modules/fsr_stl.ko:root/lib/modules/fsr_stl.ko \
     device/samsung/cooper/ramdisk/lib/modules/sec_param.ko:root/lib/modules/sec_param.ko \
     device/samsung/cooper/ramdisk/COOPER.rle:root/COOPER.rle \
-    device/samsung/cooper/ramdisk/init:root/init \
-    device/samsung/cooper/ramdisk/init.rc:root/init.rc \
-    device/samsung/cooper/ramdisk/init.gt-s5830.rc:root/init.gt-s5830.rc \
     device/samsung/cooper/prebuilt/system/lib/modules/zram.ko:system/lib/modules/zram.ko \
     device/samsung/cooper/prebuilt/system/lib/modules/cifs.ko:system/lib/modules/cifs.ko \
-    device/samsung/cooper/prebuilt/system/lib/modules/tun.ko:system/lib/modules/tun.ko
-
+    device/samsung/cooper/prebuilt/system/lib/modules/tun.ko:system/lib/modules/tun.ko \
+    device/samsung/cooper/ramdisk/init.gt-s5830board.rc:root/init.gt-s5830board.rc \
+    device/samsung/cooper/ramdisk/init.gt-s5830board.usb.rc:root/init.gt-s5830board.usb.rc \
+    device/samsung/cooper/ramdisk/ueventd.gt-s5830board.rc:root/ueventd.gt-s5830board.rc
 
 ## wifi module
 PRODUCT_COPY_FILES += \
@@ -240,7 +237,8 @@ PRODUCT_COPY_FILES += \
 
 # Misc packages
 PRODUCT_PACKAGES += \
-	Torch
+	Torch \
+	Gallery2
 
 ## Prebuilt App
 ##PRODUCT_COPY_FILES += \
@@ -275,7 +273,6 @@ PRODUCT_COPY_FILES += \
 # Google Apps
 PRODUCT_COPY_FILES += \
 	device/samsung/cooper/prebuilt/system/app/ChromeBookmarksSyncAdapter.apk:system/app/ChromeBookmarksSyncAdapter.apk \
-	device/samsung/cooper/prebuilt/system/app/GalleryGoogle.apk:system/app/GalleryGoogle.apk \
 	device/samsung/cooper/prebuilt/system/app/GenieWidget.apk:system/app/GenieWidget.apk \
 	device/samsung/cooper/prebuilt/system/app/Gmail.apk:system/app/Gmail.apk \
 	device/samsung/cooper/prebuilt/system/app/GoogleBackupTransport.apk:system/app/GoogleBackupTransport.apk \
