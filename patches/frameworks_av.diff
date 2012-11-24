@@ -1,0 +1,49 @@
+diff --git a/media/libstagefright/CameraSource.cpp b/media/libstagefright/CameraSource.cpp
+index efd7af7..e59939b 100755
+--- a/media/libstagefright/CameraSource.cpp
++++ b/media/libstagefright/CameraSource.cpp
+@@ -572,17 +572,6 @@ void CameraSource::startCameraRecording() {
+     // camera and recording is started by the applications. The applications
+     // will connect to the camera in ICameraRecordingProxy::startRecording.
+     int64_t token = IPCThreadState::self()->clearCallingIdentity();
+-    if (mNumInputBuffers > 0) {
+-        status_t err = mCamera->sendCommand(
+-            CAMERA_CMD_SET_VIDEO_BUFFER_COUNT, mNumInputBuffers, 0);
+-
+-        // This could happen for CameraHAL1 clients; thus the failure is
+-        // not a fatal error
+-        if (err != OK) {
+-            ALOGW("Failed to set video buffer count to %d due to %d",
+-                mNumInputBuffers, err);
+-        }
+-    }
+ 
+     if (mCameraFlags & FLAGS_HOT_CAMERA) {
+         mCamera->unlock();
+diff --git a/services/camera/libcameraservice/Camera2Client.cpp b/services/camera/libcameraservice/Camera2Client.cpp
+index e59a240..201c1ff 100644
+--- a/services/camera/libcameraservice/Camera2Client.cpp
++++ b/services/camera/libcameraservice/Camera2Client.cpp
+@@ -1178,8 +1178,6 @@ status_t Camera2Client::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2) {
+             return commandEnableFocusMoveMsgL(arg1 == 1);
+         case CAMERA_CMD_PING:
+             return commandPingL();
+-        case CAMERA_CMD_SET_VIDEO_BUFFER_COUNT:
+-            return commandSetVideoBufferCountL(arg1);
+         default:
+             ALOGE("%s: Unknown command %d (arguments %d, %d)",
+                     __FUNCTION__, cmd, arg1, arg2);
+diff --git a/services/camera/libcameraservice/CameraClient.cpp b/services/camera/libcameraservice/CameraClient.cpp
+index b930c02..c6d49fa 100644
+--- a/services/camera/libcameraservice/CameraClient.cpp
++++ b/services/camera/libcameraservice/CameraClient.cpp
+@@ -617,9 +617,6 @@ status_t CameraClient::sendCommand(int32_t cmd, int32_t arg1, int32_t arg2) {
+         return OK;
+     } else if (cmd == CAMERA_CMD_PLAY_RECORDING_SOUND) {
+         mCameraService->playSound(CameraService::SOUND_RECORDING);
+-    } else if (cmd == CAMERA_CMD_SET_VIDEO_BUFFER_COUNT) {
+-        // Silently ignore this command
+-        return INVALID_OPERATION;
+     } else if (cmd == CAMERA_CMD_PING) {
+         // If mHardware is 0, checkPidAndHardware will return error.
+         return OK;
