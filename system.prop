@@ -15,7 +15,6 @@ debug.qctwa.statusbar=1
 debug.qctwa.preservebuf=1
 com.qc.hardware=true
 debug.enabletr=false
-debug.hwui.render_dirty_regions=false
 
 # Camcorder
 debug.camcorder.disablemeta=1
@@ -43,6 +42,7 @@ media.stagefright.enable-record=true
 # Wifi interface
 wifi.interface=wlan0
 wifi.supplicant_scan_interval=15
+wifi.ap.interface=wlan0
 
 # System and Misc.
 ro.tether.denied=false
@@ -75,3 +75,7 @@ ro.setupwizard.enable_bypass=1
 ro.config.play.bootsound=0
 ro.com.android.wifi-watchlist=GoogleGuest
 pm.sleep_mode=1
+
+## Google's location features
+ro.com.google.locationfeatures=1
+ro.com.google.networklocation=1
