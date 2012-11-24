@@ -273,18 +273,6 @@ PRODUCT_COPY_FILES += \
 	 device/samsung/cooper/prebuilt/system/etc/permissions/com.google.widevine.software.drm.xml:system/etc/permissions/com.google.widevine.software.drm.xml \
         device/samsung/cooper/prebuilt/system/etc/g.prop:system/etc/g.prop
 
-PRODUCT_COPY_FILES += \
-        device/samsung/cooper/prebuilt/system/framework/com.google.android.maps.jar:system/framework/com.google.android.maps.jar \
-        device/samsung/cooper/prebuilt/system/framework/com.google.android.media.effects.jar:system/framework/com.google.android.media.effects.jar \
-        device/samsung/cooper/prebuilt/system/framework/com.google.widevine.software.drm.jar:system/framework/com.google.widevine.software.drm.jar
-
-PRODUCT_COPY_FILES += \
-        device/samsung/cooper/prebuilt/system/lib/libflint_engine_jni_api.so:system/lib/libflint_engine_jni_api.so \
-        device/samsung/cooper/prebuilt/system/lib/libfrsdk.so:system/lib/libfrsdk.so \
-        device/samsung/cooper/prebuilt/system/lib/libgcomm_jni.so:system/lib/libgcomm_jni.so \
-        device/samsung/cooper/prebuilt/system/lib/libspeexwrapper.so:system/lib/libspeexwrapper.so \
-        device/samsung/cooper/prebuilt/system/lib/libpicowrapper.so:system/lib/libpicowrapper.so 
-
 ## GPS
 PRODUCT_COPY_FILES += \
 	device/samsung/cooper/prebuilt/system/etc/gps.conf:system/etc/gps.conf
