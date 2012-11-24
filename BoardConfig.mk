@@ -19,17 +19,13 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-DEBUG_BIONIC_LIBC := true
-
-TARGET_PROVIDES_INIT_RC := true
 TARGET_KERNEL_CONFIG := cyanogenmod_cooper_defconfig
 TARGET_GLOBAL_CFLAGS += -mfpu=vfp -mfloat-abi=softfp -Os
 
 COMMON_GLOBAL_CFLAGS += -DQCOM_HARDWARE -DREFRESH_RATE=60
 COMMON_GLOBAL_CFLAGS += -DQCOM_LEGACY_OMX -DSAMSUNG_CAMERA_QCOM
 COMMON_GLOBAL_CFLAGS += -DQCOM_NO_SECURE_PLAYBACK -DBINDER_COMPAT
-COMMON_GLOBAL_CFLAGS += -DFORCE_CPU_UPLOAD -DQCOM_ICS_COMPAT
-COMMON_GLOBAL_CFLAGS += -DMISSING_EGL_PIXEL_FORMAT_YV12 -DMISSING_GRALLOC_BUFFERS -DUNABLE_TO_DEQUEUE -DMISSING_EGL_EXTERNAL_IMAGE
+COMMON_GLOBAL_CFLAGS += -DFORCE_CPU_UPLOAD -DQCOM_ICS_COMPAT -DSAMSUNG_CAMERA_QCOM
 
 TARGET_GLOBAL_CPPFLAGS += -mfpu=vfp -mfloat-abi=softfp -Os
 TARGET_SPECIFIC_HEADER_PATH += device/samsung/cooper/include
@@ -64,7 +60,7 @@ BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 BOARD_EGL_CFG := device/samsung/cooper/prebuilt/system/lib/egl/egl.cfg
 USE_OPENGL_RENDERER := true
-
+	
 # QCOM
 BOARD_USES_QCOM_HARDWARE := true
 BOARD_USES_QCOM_LIBS := true
@@ -77,23 +73,38 @@ TARGET_BOOTLOADER_BOARD_NAME := cooper
 # assert
 TARGET_OTA_ASSERT_DEVICE := cooper,GT-S5830
 
+# Bluetooth
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
+BOARD_HAVE_SAMSUNG_BLUETOOTH := true
 
+# FM
 BOARD_HAVE_FM_RADIO := true
 BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
 BOARD_FM_DEVICE := brcm2049
 
 # Wifi related defines
-BOARD_WPA_SUPPLICANT_DRIVER := AR6000
-WPA_SUPPLICANT_VERSION := VER_0_6_X
-BOARD_WLAN_DEVICE := wlan0
-WIFI_DRIVER_MODULE_PATH := /system/wifi/ar6000.ko
-WIFI_DRIVER_MODULE_NAME := ar6000
+WPA_SUPPLICANT_VERSION                  := VER_0_6_X
+WIFI_DRIVER_MODULE_NAME			:= ar6000
+WIFI_AP_DRIVER_MODULE_NAME              := ar6000
+BOARD_HAVE_SAMSUNG_WIFI                 := true
+BOARD_WEXT_NO_COMBO_SCAN		:= true
+BOARD_WPA_SUPPLICANT_DRIVER		:= WEXT
+WIFI_DRIVER_MODULE_ARG                  := "ifname=wlan0 fwmode=1"
+BOARD_HOSTAPD_DRIVER			:= WEXT
+WIFI_AP_DRIVER_MODULE_ARG               := "ifname=athap0 fwmode=2"
+BOARD_WLAN_DEVICE                       := ath6kl
+WIFI_DRIVER_MODULE_PATH                 := /system/wifi/ar6000.ko
+WIFI_AP_DRIVER_MODULE_PATH              := /system/wifi/ar6000.ko
+BOARD_WLAN_CHIP_AR6003                  := true
+BOARD_WLAN_ATHEROS_SDK	                := AR6kSDK.3.1/AR6kSDK.build_3.1_RC.563
+
+# Wi-Fi Hotspot
+BOARD_HAVE_LEGACY_HOSTAPD := true
+BOARD_HOSTAPD_NO_ENTROPY := true
 
 # RIL
 BOARD_USES_LEGACY_RIL := true
-BOARD_FORCE_RILD_AS_ROOT := true
 BOARD_MOBILEDATA_INTERFACE_NAME := "pdp0"
 
 # GPS
@@ -112,10 +123,7 @@ BOARD_KERNEL_PAGESIZE := 4096
 
 TARGET_PROVIDES_LIBAUDIO := true
 TARGET_PROVIDES_LIBLIGHTS := true
-
-BOARD_USE_USB_MASS_STORAGE_SWITCH := true
-BOARD_SDCARD_DEVICE_INTERNAL := /dev/block/vold/179:1
-BOARD_SDEXT_DEVICE := /dev/block/vold/179:2
+BOARD_HAVE_SAMSUNG_AUDIO := true
 
 BOARD_UMS_LUNFILE := "/sys/devices/platform/usb_mass_storage/lun0/file"
 TARGET_USE_CUSTOM_LUN_FILE_PATH  := "/sys/devices/platform/usb_mass_storage/lun0/file"
@@ -123,23 +131,32 @@ TARGET_USE_CUSTOM_LUN_FILE_PATH  := "/sys/devices/platform/usb_mass_storage/lun0
 DISABLE_DEXPREOPT := true
 BOARD_USE_LEGACY_TOUCHSCREEN := true
 
-##TARGET_HAVE_BYPASS := false
-
-##BOARD_USE_SKIA_LCDTEXT := true
-
 # Recovery
-TARGET_USERIMAGES_USE_EXT4         := true
+BOARD_LDPI_RECOVERY := true
+BOARD_USE_CUSTOM_RECOVERY_FONT := "<font_7x16.h>"
+BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/samsung/cooper/recovery/recovery_ui.c
+BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/cooper/recovery/graphics.c
+TARGET_RECOVERY_INITRC := device/samsung/cooper/recovery/recovery.rc
+TARGET_RECOVERY_FSTAB := device/samsung/cooper/recovery/recovery.fstab
+TARGET_PREBUILT_RECOVERY_KERNEL := device/samsung/cooper/recovery/recovery_kernel
+
+BOARD_HAS_DOWNLOAD_MODE := true
+TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_BOOTIMAGE_PARTITION_SIZE := 8388608
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 8388608
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 219938816
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 190054400
-BOARD_FLASH_BLOCK_SIZE             := 131072
-BOARD_KERNEL_CMDLINE :=
-BOARD_BML_BOOT                     := "/dev/block/bml8"
-BOARD_BML_RECOVERY                 := "/dev/block/bml9"
+BOARD_FLASH_BLOCK_SIZE := 131072
+BOARD_KERNEL_CMDLINE := 
+BOARD_BML_BOOT := "/dev/block/bml8"
+BOARD_BML_RECOVERY := "/dev/block/bml9"
+BOARD_RECOVERY_HANDLES_MOUNT := true
 
-BOARD_RECOVERY_HANDLES_MOUNT       := true
-BOARD_CUSTOM_GRAPHICS              := ../../../device/samsung/cooper/recovery/graphics.c
+# Fixes colors in panorama
+BOARD_CPU_COLOR_CONVERT := true
+
+# Samsung has weird framebuffer
+TARGET_NO_INITLOGO := true
 
 # Bootanimation
 TARGET_BOOTANIMATION_USE_RGB565 := true
