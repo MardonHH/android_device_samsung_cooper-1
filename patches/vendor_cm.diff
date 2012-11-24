@@ -1,0 +1,28 @@
+diff --git a/config/common.mk b/config/common.mk
+index 56cd33d..d118ee4 100644
+--- a/config/common.mk
++++ b/config/common.mk
+@@ -119,9 +119,6 @@ PRODUCT_COPY_FILES += \
+ PRODUCT_COPY_FILES += \
+     vendor/cm/prebuilt/common/etc/mkshrc:system/etc/mkshrc
+ 
+-# T-Mobile theme engine
+-include vendor/cm/config/themes_common.mk
+-
+ # Required CM packages
+ PRODUCT_PACKAGES += \
+     Camera \
+diff --git a/config/themes_common.mk b/config/themes_common.mk
+index b37fd9d..e69de29 100644
+--- a/config/themes_common.mk
++++ b/config/themes_common.mk
+@@ -1,9 +0,0 @@
+-# T-Mobile theme engine
+-PRODUCT_PACKAGES += \
+-       ThemeManager \
+-       ThemeChooser \
+-       com.tmobile.themes \
+-       CMFileManagerThemes
+-
+-PRODUCT_COPY_FILES += \
+-       vendor/cm/config/permissions/com.tmobile.software.themes.xml:system/etc/permissions/com.tmobile.software.themes.xml
