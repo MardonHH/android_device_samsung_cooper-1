@@ -311,11 +311,6 @@ PRODUCT_COPY_FILES += \
         device/samsung/cooper/prebuilt/system/lib/libpicowrapper.so:system/lib/libpicowrapper.so \
         device/samsung/cooper/prebuilt/system/lib/libvoicesearch.so:system/lib/libvoicesearch.so
 
-## GPS patch by Mardon
+## GPS
 PRODUCT_COPY_FILES += \
-	device/samsung/cooper/prebuilt/system/etc/gps.conf:system/etc/gps.conf \
-	device/samsung/cooper/prebuilt/system/etc/T-Mobile_USA_Intermediate_CA_01.der:system/etc/T-Mobile_USA_Intermediate_CA_01.der \
-	device/samsung/cooper/prebuilt/system/etc/T-Mobile_USA_Issuer_CA_01.der:system/etc/T-Mobile_USA_Issuer_CA_01.der \
-	device/samsung/cooper/prebuilt/system/etc/T-Mobile_USA_Issuer_CA_02.der:system/etc/T-Mobile_USA_Issuer_CA_02.der \
-	device/samsung/cooper/prebuilt/system/etc/T-Mobile_USA_Root_CA.der:system/etc/T-Mobile_USA_Root_CA.der
-##    device/samsung/cooper/prebuilt/system/etc/secgps.conf:system/etc/secgps.conf
+	device/samsung/cooper/prebuilt/system/etc/gps.conf:system/etc/gps.conf
