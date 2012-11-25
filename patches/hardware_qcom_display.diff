@@ -9,3 +9,1417 @@ index fa5c38f..b85da2d 100644
  display-hals := libgralloc libgenlock libcopybit
  display-hals += libhwcomposer liboverlay libqdutils libexternal libqservice
  ifneq ($(TARGET_PROVIDES_LIBLIGHT),true)
+diff --git a/common.mk b/common.mk
+index ed8edc3..161aec5 100644
+--- a/common.mk
++++ b/common.mk
+@@ -31,6 +31,10 @@ ifeq ($(ARCH_ARM_HAVE_NEON),true)
+     common_flags += -D__ARM_HAVE_NEON
+ endif
+ 
++ifeq ($(TARGET_NO_HW_VSYNC),true)
++    common_flags += -DNO_HW_VSYNC
++endif
++
+ common_deps  :=
+ kernel_includes :=
+ 
+diff --git a/libgralloc/Android.mk b/libgralloc/Android.mk
+index ae745f2..2b8f634 100644
+--- a/libgralloc/Android.mk
++++ b/libgralloc/Android.mk
+@@ -24,7 +24,6 @@ LOCAL_C_INCLUDES              := $(common_includes)
+ LOCAL_SHARED_LIBRARIES        := $(common_libs) libmemalloc libgenlock
+ LOCAL_SHARED_LIBRARIES        += libqdutils libGLESv1_CM
+ LOCAL_CFLAGS                  := $(common_flags) -DLOG_TAG=\"gralloc\"
+-LOCAL_ADDITIONAL_DEPENDENCIES := $(common_deps)
+ LOCAL_SRC_FILES               :=  gpu.cpp gralloc.cpp framebuffer.cpp mapper.cpp
+ include $(BUILD_SHARED_LIBRARY)
+ 
+@@ -33,7 +32,14 @@ include $(CLEAR_VARS)
+ LOCAL_MODULE           := libmemalloc
+ LOCAL_MODULE_TAGS      := optional
+ LOCAL_C_INCLUDES       := $(common_includes)
+-LOCAL_SHARED_LIBRARIES := $(common_libs) libgenlock
++LOCAL_SHARED_LIBRARIES := $(common_libs) libgenlock libqdutils
+ LOCAL_CFLAGS           := $(common_flags) -DLOG_TAG=\"memalloc\"
+-LOCAL_SRC_FILES        :=  ionalloc.cpp alloc_controller.cpp
++LOCAL_SRC_FILES        := alloc_controller.cpp
++ifeq ($(TARGET_USES_ION),true)
++    LOCAL_SRC_FILES += ionalloc.cpp
++else
++    LOCAL_SRC_FILES += ashmemalloc.cpp \
++                       pmemalloc.cpp \
++                       pmem_bestfit_alloc.cpp
++endif
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/libgralloc/alloc_controller.cpp b/libgralloc/alloc_controller.cpp
+index e4d1d68..4226c0a 100644
+--- a/libgralloc/alloc_controller.cpp
++++ b/libgralloc/alloc_controller.cpp
+@@ -28,16 +28,30 @@
+  */
+ 
+ #include <cutils/log.h>
++#include <utils/RefBase.h>
+ #include <fcntl.h>
+ #include "gralloc_priv.h"
+ #include "alloc_controller.h"
+ #include "memalloc.h"
+ #include "ionalloc.h"
++#include "pmemalloc.h"
++#include "ashmemalloc.h"
+ #include "gr.h"
+ #include "comptype.h"
+ 
+ using namespace gralloc;
+ using namespace qdutils;
++using android::sp;
++
++const int GRALLOC_HEAP_MASK  =  GRALLOC_USAGE_PRIVATE_ADSP_HEAP      |
++                                GRALLOC_USAGE_PRIVATE_UI_CONTIG_HEAP |
++                                GRALLOC_USAGE_PRIVATE_SMI_HEAP       |
++                                GRALLOC_USAGE_PRIVATE_SYSTEM_HEAP    |
++                                GRALLOC_USAGE_PRIVATE_IOMMU_HEAP     |
++                                GRALLOC_USAGE_PRIVATE_MM_HEAP        |
++                                GRALLOC_USAGE_PRIVATE_WRITEBACK_HEAP |
++                                GRALLOC_USAGE_PRIVATE_CAMERA_HEAP;
++
+ 
+ //Common functions
+ static bool canFallback(int usage, bool triedSystem)
+@@ -75,22 +89,31 @@ static bool useUncached(int usage)
+ }
+ 
+ IAllocController* IAllocController::sController = NULL;
+-IAllocController* IAllocController::getInstance(void)
++IAllocController* IAllocController::getInstance(bool useMasterHeap)
+ {
+     if(sController == NULL) {
++#ifdef USE_ION
+         sController = new IonController();
++#else
++        if(useMasterHeap)
++            sController = new PmemAshmemController();
++        else
++            sController = new PmemKernelController();
++#endif
+     }
+     return sController;
+ }
+ 
+ 
++#ifdef USE_ION
+ //-------------- IonController-----------------------//
+ IonController::IonController()
+ {
+     mIonAlloc = new IonAlloc();
+ }
+ 
+-int IonController::allocate(alloc_data& data, int usage)
++int IonController::allocate(alloc_data& data, int usage,
++                            int compositionType)
+ {
+     int ionFlags = 0;
+     int ret;
+@@ -113,12 +136,20 @@ int IonController::allocate(alloc_data& data, int usage)
+     if(usage & GRALLOC_USAGE_PRIVATE_MM_HEAP)
+         ionFlags |= ION_HEAP(ION_CP_MM_HEAP_ID);
+ 
++    if(usage & GRALLOC_USAGE_PRIVATE_WRITEBACK_HEAP)
++        ionFlags |= ION_HEAP(ION_CP_WB_HEAP_ID);
++
+     if(usage & GRALLOC_USAGE_PRIVATE_CAMERA_HEAP)
+         ionFlags |= ION_HEAP(ION_CAMERA_HEAP_ID);
+ 
+     if(usage & GRALLOC_USAGE_PRIVATE_CP_BUFFER)
+         ionFlags |= ION_SECURE;
+ 
++    if(usage & GRALLOC_USAGE_PRIVATE_DO_NOT_MAP)
++        data.allocType  |=  private_handle_t::PRIV_FLAGS_NOT_MAPPED;
++    else
++        data.allocType  &=  ~(private_handle_t::PRIV_FLAGS_NOT_MAPPED);
++
+     // if no flags are set, default to
+     // SF + IOMMU heaps, so that bypass can work
+     // we can fall back to system heap if
+@@ -150,9 +181,9 @@ int IonController::allocate(alloc_data& data, int usage)
+     return ret;
+ }
+ 
+-IMemAlloc* IonController::getAllocator(int flags)
++sp<IMemAlloc> IonController::getAllocator(int flags)
+ {
+-    IMemAlloc* memalloc = NULL;
++    sp<IMemAlloc> memalloc;
+     if (flags & private_handle_t::PRIV_FLAGS_USES_ION) {
+         memalloc = mIonAlloc;
+     } else {
+@@ -161,7 +192,153 @@ IMemAlloc* IonController::getAllocator(int flags)
+ 
+     return memalloc;
+ }
++#endif
++
++//-------------- PmemKernelController-----------------------//
++//XXX: Remove - we're not using pmem anymore
++#ifndef USE_ION
++PmemKernelController::PmemKernelController()
++{
++    mPmemAdspAlloc = new PmemKernelAlloc(DEVICE_PMEM_ADSP);
++    // XXX: Right now, there is no need to maintain an instance
++    // of the SMI allocator as we need it only in a few cases
++}
++
++PmemKernelController::~PmemKernelController()
++{
++}
++
++int PmemKernelController::allocate(alloc_data& data, int usage,
++                                   int compositionType)
++{
++    int ret = 0;
++    bool adspFallback = false;
++    if (!(usage & GRALLOC_USAGE_PRIVATE_SMI_HEAP))
++        adspFallback = true;
++
++    // Try SMI first
++    if ((usage & GRALLOC_USAGE_PRIVATE_SMI_HEAP) ||
++        (usage & GRALLOC_USAGE_EXTERNAL_DISP)    ||
++        (usage & GRALLOC_USAGE_PROTECTED))
++    {
++        int tempFd = open(DEVICE_PMEM_SMIPOOL, O_RDWR, 0);
++        if(tempFd > 0) {
++            close(tempFd);
++            IMemAlloc* memalloc;
++            memalloc = new PmemKernelAlloc(DEVICE_PMEM_SMIPOOL);
++            ret = memalloc->alloc_buffer(data);
++            if(ret >= 0)
++                return ret;
++            else {
++                if(adspFallback)
++                    ALOGW("Allocation from SMI failed, trying ADSP");
++            }
++        }
++    }
++
++    if ((usage & GRALLOC_USAGE_PRIVATE_ADSP_HEAP) || adspFallback) {
++        ret = mPmemAdspAlloc->alloc_buffer(data);
++    }
++    return ret;
++}
++
++IMemAlloc* PmemKernelController::getAllocator(int flags)
++{
++    IMemAlloc* memalloc;
++    if (flags & private_handle_t::PRIV_FLAGS_USES_PMEM_ADSP)
++        memalloc = mPmemAdspAlloc;
++    else {
++        ALOGE("%s: Invalid flags passed: 0x%x", __FUNCTION__, flags);
++        memalloc = NULL;
++    }
++
++    return memalloc;
++}
++
++//-------------- PmemAshmmemController-----------------------//
++
++PmemAshmemController::PmemAshmemController()
++{
++    mPmemUserspaceAlloc = new PmemUserspaceAlloc();
++    mAshmemAlloc = new AshmemAlloc();
++    mPmemKernelCtrl = new PmemKernelController();
++}
+ 
++PmemAshmemController::~PmemAshmemController()
++{
++}
++
++int PmemAshmemController::allocate(alloc_data& data, int usage,
++                                   int compositionType)
++{
++    int ret = 0;
++    data.allocType = 0;
++
++    // Make buffers cacheable by default
++    data.uncached = false;
++
++    // Override if we explicitly need uncached buffers
++    if (usage & GRALLOC_USAGE_PRIVATE_UNCACHED)
++        data.uncached = true;
++
++    // If ADSP or SMI is requested use the kernel controller
++    if(usage & (GRALLOC_USAGE_PRIVATE_ADSP_HEAP|
++                GRALLOC_USAGE_PRIVATE_SMI_HEAP)) {
++        ret = mPmemKernelCtrl->allocate(data, usage, compositionType);
++        if(ret < 0)
++            ALOGE("%s: Failed to allocate ADSP/SMI memory", __func__);
++        else
++            data.allocType = private_handle_t::PRIV_FLAGS_USES_PMEM_ADSP;
++        return ret;
++    }
++
++    if(usage & GRALLOC_USAGE_PRIVATE_SYSTEM_HEAP) {
++        ret = mAshmemAlloc->alloc_buffer(data);
++        if(ret >= 0) {
++            data.allocType = private_handle_t::PRIV_FLAGS_USES_ASHMEM;
++            data.allocType |= private_handle_t::PRIV_FLAGS_NONCONTIGUOUS_MEM;
++        }
++        return ret;
++    }
++
++    // if no memory specific flags are set,
++    // default to EBI heap, so that bypass
++    // can work. We can fall back to system
++    // heap if we run out.
++    ret = mPmemUserspaceAlloc->alloc_buffer(data);
++
++    // Fallback
++    if(ret >= 0 ) {
++        data.allocType = private_handle_t::PRIV_FLAGS_USES_PMEM;
++    } else if(ret < 0 && canFallback(usage, false)) {
++        ALOGW("Falling back to ashmem");
++        ret = mAshmemAlloc->alloc_buffer(data);
++        if(ret >= 0) {
++            data.allocType = private_handle_t::PRIV_FLAGS_USES_ASHMEM;
++            data.allocType |= private_handle_t::PRIV_FLAGS_NONCONTIGUOUS_MEM;
++        }
++    }
++
++    return ret;
++}
++
++IMemAlloc* PmemAshmemController::getAllocator(int flags)
++{
++    IMemAlloc* memalloc;
++    if (flags & private_handle_t::PRIV_FLAGS_USES_PMEM)
++        memalloc = mPmemUserspaceAlloc;
++    else if (flags & private_handle_t::PRIV_FLAGS_USES_PMEM_ADSP)
++        memalloc = mPmemKernelCtrl->getAllocator(flags);
++    else if (flags & private_handle_t::PRIV_FLAGS_USES_ASHMEM)
++        memalloc = mAshmemAlloc;
++    else {
++        ALOGE("%s: Invalid flags passed: 0x%x", __FUNCTION__, flags);
++        memalloc = NULL;
++    }
++
++    return memalloc;
++}
++#endif
+ size_t getBufferSizeAndDimensions(int width, int height, int format,
+                                   int& alignedw, int &alignedh)
+ {
+@@ -242,8 +419,8 @@ int alloc_buffer(private_handle_t **pHnd, int w, int h, int format, int usage)
+ {
+     alloc_data data;
+     int alignedw, alignedh;
+-    gralloc::IAllocController* sAlloc =
+-        gralloc::IAllocController::getInstance();
++    android::sp<gralloc::IAllocController> sAlloc =
++        gralloc::IAllocController::getInstance(false);
+     data.base = 0;
+     data.fd = -1;
+     data.offset = 0;
+@@ -252,15 +429,14 @@ int alloc_buffer(private_handle_t **pHnd, int w, int h, int format, int usage)
+     data.uncached = useUncached(usage);
+     int allocFlags = usage;
+ 
+-    int err = sAlloc->allocate(data, allocFlags);
++    int err = sAlloc->allocate(data, allocFlags, 0);
+     if (0 != err) {
+         ALOGE("%s: allocate failed", __FUNCTION__);
+         return -ENOMEM;
+     }
+ 
+     private_handle_t* hnd = new private_handle_t(data.fd, data.size,
+-                                                 data.allocType, 0, format,
+-                                                 alignedw, alignedh);
++                                                 data.allocType, 0, format, alignedw, alignedh);
+     hnd->base = (int) data.base;
+     hnd->offset = data.offset;
+     hnd->gpuaddr = 0;
+@@ -270,10 +446,10 @@ int alloc_buffer(private_handle_t **pHnd, int w, int h, int format, int usage)
+ 
+ void free_buffer(private_handle_t *hnd)
+ {
+-    gralloc::IAllocController* sAlloc =
+-        gralloc::IAllocController::getInstance();
++    android::sp<gralloc::IAllocController> sAlloc =
++        gralloc::IAllocController::getInstance(false);
+     if (hnd && hnd->fd > 0) {
+-        IMemAlloc* memalloc = sAlloc->getAllocator(hnd->flags);
++        sp<IMemAlloc> memalloc = sAlloc->getAllocator(hnd->flags);
+         memalloc->free_buffer((void*)hnd->base, hnd->size, hnd->offset, hnd->fd);
+     }
+     if(hnd)
+diff --git a/libgralloc/alloc_controller.h b/libgralloc/alloc_controller.h
+index f04917a..8b61155 100644
+--- a/libgralloc/alloc_controller.h
++++ b/libgralloc/alloc_controller.h
+@@ -29,25 +29,27 @@
+ #ifndef GRALLOC_ALLOCCONTROLLER_H
+ #define GRALLOC_ALLOCCONTROLLER_H
+ 
++#include <utils/RefBase.h>
++
+ namespace gralloc {
+ 
+ struct alloc_data;
+ class IMemAlloc;
+ class IonAlloc;
+ 
+-class IAllocController {
++class IAllocController : public android::RefBase {
+ 
+     public:
+     /* Allocate using a suitable method
+      * Returns the type of buffer allocated
+      */
+-    virtual int allocate(alloc_data& data, int usage) = 0;
++    virtual int allocate(alloc_data& data, int usage, int compositionType) = 0;
+ 
+     virtual IMemAlloc* getAllocator(int flags) = 0;
+ 
+     virtual ~IAllocController() {};
+ 
+-    static IAllocController* getInstance(void);
++    static IAllocController* getInstance(bool useMasterHeap);
+ 
+     private:
+     static IAllocController* sController;
+@@ -57,15 +59,55 @@ class IAllocController {
+ class IonController : public IAllocController {
+ 
+     public:
+-    virtual int allocate(alloc_data& data, int usage);
++    virtual int allocate(alloc_data& data, int usage,
++                         int compositionType);
+ 
+     virtual IMemAlloc* getAllocator(int flags);
+ 
+     IonController();
+ 
+     private:
+-    IonAlloc* mIonAlloc;
++    IMemAlloc* mIonAlloc;
++
++};
++
++class PmemKernelController : public IAllocController {
++
++    public:
++    virtual int allocate(alloc_data& data, int usage,
++                         int compositionType);
++
++    virtual IMemAlloc* getAllocator(int flags);
++
++    PmemKernelController ();
++
++    ~PmemKernelController ();
++
++    private:
++    IMemAlloc* mPmemAdspAlloc;
+ 
+ };
++
++// Main pmem controller - this should only
++// be used within gralloc
++class PmemAshmemController : public IAllocController {
++
++    public:
++    virtual int allocate(alloc_data& data, int usage,
++                         int compositionType);
++
++    virtual IMemAlloc* getAllocator(int flags);
++
++    PmemAshmemController();
++
++    ~PmemAshmemController();
++
++    private:
++    IMemAlloc* mPmemUserspaceAlloc;
++    IMemAlloc* mAshmemAlloc;
++    IAllocController* mPmemKernelCtrl;
++
++};
++
+ } //end namespace gralloc
+ #endif // GRALLOC_ALLOCCONTROLLER_H
+diff --git a/libgralloc/fb_priv.h b/libgralloc/fb_priv.h
+index 8f1a09b..340968c 100644
+--- a/libgralloc/fb_priv.h
++++ b/libgralloc/fb_priv.h
+@@ -18,7 +18,6 @@
+ #ifndef FB_PRIV_H
+ #define FB_PRIV_H
+ #include <linux/fb.h>
+-#include <linux/msm_mdp.h>
+ 
+ #define NUM_FRAMEBUFFERS_MIN  2
+ #define NUM_FRAMEBUFFERS_MAX  3
+@@ -45,8 +44,6 @@ struct private_module_t {
+     pthread_mutex_t lock;
+     private_handle_t *currentBuffer;
+     struct fb_var_screeninfo info;
+-    struct mdp_buf_fence fence;
+-    struct mdp_display_commit commit;
+     struct fb_fix_screeninfo finfo;
+     float xdpi;
+     float ydpi;
+diff --git a/libgralloc/framebuffer.cpp b/libgralloc/framebuffer.cpp
+index 576e021..2927eeb 100644
+--- a/libgralloc/framebuffer.cpp
++++ b/libgralloc/framebuffer.cpp
+@@ -100,23 +100,51 @@ static int fb_setUpdateRect(struct framebuffer_device_t* dev,
+ 
+ static int fb_post(struct framebuffer_device_t* dev, buffer_handle_t buffer)
+ {
++    if (private_handle_t::validate(buffer) < 0)
++        return -EINVAL;
+ 
+     fb_context_t* ctx = (fb_context_t*) dev;
+ 
+     private_handle_t *hnd = static_cast<private_handle_t*>
+-            (const_cast<native_handle_t*>(buffer));
++                            (const_cast<native_handle_t*>(buffer));
++
+     private_module_t* m =
+         reinterpret_cast<private_module_t*>(dev->common.module);
+ 
+-    if (hnd && hnd->flags & private_handle_t::PRIV_FLAGS_FRAMEBUFFER) {
+-        m->info.activate = FB_ACTIVATE_VBL | FB_ACTIVATE_FORCE;
+-        m->info.yoffset = hnd->offset / m->finfo.line_length;
+-        m->commit.var = m->info;
+-        if (ioctl(m->framebuffer->fd, MSMFB_DISPLAY_COMMIT, &m->commit) == -1) {
+-            ALOGE("%s: MSMFB_DISPLAY_COMMIT ioctl failed, err: %s", __FUNCTION__,
+-                    strerror(errno));
++
++    if (hnd->flags & private_handle_t::PRIV_FLAGS_FRAMEBUFFER) {
++        genlock_lock_buffer(hnd, GENLOCK_READ_LOCK, GENLOCK_MAX_TIMEOUT);
++
++        const size_t offset = hnd->base - m->framebuffer->base;
++        // frame ready to be posted, signal so that hwc can update External
++        // display
++        pthread_mutex_lock(&m->fbPostLock);
++        m->currentOffset = offset;
++        m->fbPostDone = true;
++        pthread_cond_signal(&m->fbPostCond);
++        pthread_mutex_unlock(&m->fbPostLock);
++
++        m->info.activate = FB_ACTIVATE_VBL;
++        m->info.yoffset = offset / m->finfo.line_length;
++        if (ioctl(m->framebuffer->fd, FBIOPUT_VSCREENINFO, &m->info) == -1) {
++            ALOGE("FBIOPUT_VSCREENINFO failed");
++            genlock_unlock_buffer(hnd);
+             return -errno;
+         }
++
++        //Signals the composition thread to unblock and loop over if necessary
++        pthread_mutex_lock(&m->fbPanLock);
++        m->fbPanDone = true;
++        pthread_cond_signal(&m->fbPanCond);
++        pthread_mutex_unlock(&m->fbPanLock);
++
++        if (m->currentBuffer) {
++            genlock_unlock_buffer(m->currentBuffer);
++            m->currentBuffer = 0;
++        }
++
++        CALC_FPS();
++        m->currentBuffer = hnd;
+     }
+     return 0;
+ }
+@@ -124,8 +152,9 @@ static int fb_post(struct framebuffer_device_t* dev, buffer_handle_t buffer)
+ static int fb_compositionComplete(struct framebuffer_device_t* dev)
+ {
+     // TODO: Properly implement composition complete callback
++#ifdef ANCIENT_GL
+     glFinish();
+-
++#endif
+     return 0;
+ }
+ 
+@@ -153,9 +182,6 @@ int mapFrameBufferLocked(struct private_module_t* module)
+     if (fd < 0)
+         return -errno;
+ 
+-    memset(&module->fence, 0, sizeof(struct mdp_buf_fence));
+-    memset(&module->commit, 0, sizeof(struct mdp_display_commit));
+-
+     struct fb_fix_screeninfo finfo;
+     if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo) == -1)
+         return -errno;
+@@ -183,14 +209,21 @@ int mapFrameBufferLocked(struct private_module_t* module)
+         /*
+          * Explicitly request RGBA_8888
+          */
+-        info.bits_per_pixel = 32;
++#ifdef SEMC_RGBA_8888_OFFSET
++        info.red.offset     = 0;
++        info.green.offset   = 8;
++        info.blue.offset    = 16;
++        info.transp.offset  = 24;
++#else
+         info.red.offset     = 24;
+-        info.red.length     = 8;
+         info.green.offset   = 16;
+-        info.green.length   = 8;
+         info.blue.offset    = 8;
+-        info.blue.length    = 8;
+         info.transp.offset  = 0;
++#endif
++        info.bits_per_pixel = 32;
++        info.red.length     = 8;
++        info.green.length   = 8;
++        info.blue.length    = 8;
+         info.transp.length  = 8;
+ 
+         /* Note: the GL driver does not have a r=8 g=8 b=8 a=0 config, so if we
+@@ -246,6 +279,11 @@ int mapFrameBufferLocked(struct private_module_t* module)
+     info.yres_virtual = (size * numberOfBuffers) / line_length;
+ 
+     uint32_t flags = PAGE_FLIP;
++    if (ioctl(fd, FBIOPUT_VSCREENINFO, &info) == -1) {
++        info.yres_virtual = size / line_length;
++        flags &= ~PAGE_FLIP;
++        ALOGW("FBIOPUT_VSCREENINFO failed, page flipping not supported");
++    }
+ 
+     if (info.yres_virtual < ((size * 2) / line_length) ) {
+         // we need at least 2 for page-flipping
+@@ -267,7 +305,7 @@ int mapFrameBufferLocked(struct private_module_t* module)
+ 
+     float xdpi = (info.xres * 25.4f) / info.width;
+     float ydpi = (info.yres * 25.4f) / info.height;
+-    //The reserved[3] field is used to store FPS by the driver.
++    //The reserved[4] field is used to store FPS by the driver.
+     float fps  = info.reserved[3] & 0xFF;
+ 
+     ALOGI("using (fd=%d)\n"
+@@ -322,7 +360,7 @@ int mapFrameBufferLocked(struct private_module_t* module)
+      */
+ 
+     int err;
+-    module->numBuffers = 2;
++    module->numBuffers = info.yres_virtual / info.yres;
+     module->bufferMask = 0;
+     //adreno needs page aligned offsets. Align the fbsize to pagesize.
+     size_t fbSize = roundUpToPageSize(finfo.line_length * info.yres)*
+@@ -362,9 +400,7 @@ static int fb_close(struct hw_device_t *dev)
+ {
+     fb_context_t* ctx = (fb_context_t*)dev;
+     if (ctx) {
+-        //Hack until fbdev is removed. Framework could close this causing hwc a
+-        //pain.
+-        //free(ctx);
++        free(ctx);
+     }
+     return 0;
+ }
+diff --git a/libgralloc/gpu.cpp b/libgralloc/gpu.cpp
+index ed4394a..89a860d 100644
+--- a/libgralloc/gpu.cpp
++++ b/libgralloc/gpu.cpp
+@@ -29,9 +29,10 @@
+ #include "alloc_controller.h"
+ 
+ using namespace gralloc;
++using android::sp;
+ 
+ gpu_context_t::gpu_context_t(const private_module_t* module,
+-                             IAllocController* alloc_ctrl ) :
++                             sp<IAllocController> alloc_ctrl ) :
+     mAllocCtrl(alloc_ctrl)
+ {
+     // Zero out the alloc_device_t
+@@ -43,6 +44,7 @@ gpu_context_t::gpu_context_t(const private_module_t* module,
+     common.module  = const_cast<hw_module_t*>(&module->base.common);
+     common.close   = gralloc_close;
+     alloc          = gralloc_alloc;
++    allocSize      = gralloc_alloc_size;
+     free           = gralloc_free;
+ 
+ }
+@@ -52,8 +54,8 @@ int gpu_context_t::gralloc_alloc_framebuffer_locked(size_t size, int usage,
+ {
+     private_module_t* m = reinterpret_cast<private_module_t*>(common.module);
+ 
+-    // we don't support framebuffer allocations with graphics heap flags
+-    if (usage & GRALLOC_HEAP_MASK) {
++    // we don't support allocations with both the FB and PMEM_ADSP flags
++    if (usage & GRALLOC_USAGE_PRIVATE_ADSP_HEAP) {
+         return -EINVAL;
+     }
+ 
+@@ -136,7 +138,7 @@ int gpu_context_t::gralloc_alloc_buffer(size_t size, int usage,
+     else
+         data.align = getpagesize();
+     data.pHandle = (unsigned int) pHandle;
+-    err = mAllocCtrl->allocate(data, usage);
++    err = mAllocCtrl->allocate(data, usage, 0);
+ 
+     if (usage & GRALLOC_USAGE_PRIVATE_UNSYNCHRONIZED) {
+         flags |= private_handle_t::PRIV_FLAGS_UNSYNCHRONIZED;
+@@ -152,18 +154,6 @@ int gpu_context_t::gralloc_alloc_buffer(size_t size, int usage,
+         }
+     }
+ 
+-    if (usage & GRALLOC_USAGE_HW_VIDEO_ENCODER ) {
+-        flags |= private_handle_t::PRIV_FLAGS_VIDEO_ENCODER;
+-    }
+-
+-    if (usage & GRALLOC_USAGE_HW_CAMERA_WRITE) {
+-        flags |= private_handle_t::PRIV_FLAGS_CAMERA_WRITE;
+-    }
+-
+-    if (usage & GRALLOC_USAGE_HW_CAMERA_READ) {
+-        flags |= private_handle_t::PRIV_FLAGS_CAMERA_READ;
+-    }
+-
+     if (err == 0) {
+         flags |= data.allocType;
+         private_handle_t* hnd = new private_handle_t(data.fd, size, flags,
+@@ -180,15 +170,22 @@ int gpu_context_t::gralloc_alloc_buffer(size_t size, int usage,
+ }
+ 
+ void gpu_context_t::getGrallocInformationFromFormat(int inputFormat,
++                                                    int *colorFormat,
+                                                     int *bufferType)
+ {
+     *bufferType = BUFFER_TYPE_VIDEO;
++    *colorFormat = inputFormat;
+ 
+-    if (inputFormat < 0x7) {
++    // HAL_PIXEL_FORMAT_RGB_888 is MPQ color format for VCAP videos
++    // value of RGB_888 is less than 0x7 and this format is not supported
++    // by the GPU
++    if ((inputFormat < 0x7) && (inputFormat != HAL_PIXEL_FORMAT_RGB_888)) {
+         // RGB formats
++        *colorFormat = inputFormat;
+         *bufferType = BUFFER_TYPE_UI;
+     } else if ((inputFormat == HAL_PIXEL_FORMAT_R_8) ||
+                (inputFormat == HAL_PIXEL_FORMAT_RG_88)) {
++        *colorFormat = inputFormat;
+         *bufferType = BUFFER_TYPE_UI;
+     }
+ }
+@@ -201,26 +198,13 @@ int gpu_context_t::alloc_impl(int w, int h, int format, int usage,
+ 
+     size_t size;
+     int alignedw, alignedh;
+-    int grallocFormat = format;
+-    int bufferType;
+-
+-    //If input format is HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED then based on
+-    //the usage bits, gralloc assigns a format.
+-    if(format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+-        if(usage & GRALLOC_USAGE_HW_VIDEO_ENCODER)
+-            grallocFormat = HAL_PIXEL_FORMAT_YCbCr_420_SP; //NV12
+-        else if(usage & GRALLOC_USAGE_HW_CAMERA_READ)
+-            grallocFormat = HAL_PIXEL_FORMAT_YCrCb_420_SP; //NV21
+-        else if(usage & GRALLOC_USAGE_HW_CAMERA_WRITE)
+-            grallocFormat = HAL_PIXEL_FORMAT_YCrCb_420_SP; //NV21
+-    }
+-
+-    getGrallocInformationFromFormat(grallocFormat, &bufferType);
+-    size = getBufferSizeAndDimensions(w, h, grallocFormat, alignedw, alignedh);
++    int colorFormat, bufferType;
++    getGrallocInformationFromFormat(format, &colorFormat, &bufferType);
++    size = getBufferSizeAndDimensions(w, h, colorFormat, alignedw, alignedh);
+ 
+     if ((ssize_t)size <= 0)
+         return -EINVAL;
+-    size = (bufferSize >= size)? bufferSize : size;
++    size = (bufferSize != 0)? bufferSize : size;
+ 
+     // All buffers marked as protected or for external
+     // display need to go to overlay
+@@ -230,14 +214,11 @@ int gpu_context_t::alloc_impl(int w, int h, int format, int usage,
+         bufferType = BUFFER_TYPE_VIDEO;
+     }
+     int err;
+-    private_module_t* m = reinterpret_cast<private_module_t*>(common.module);
+-    uint32_t bufferMask = m->bufferMask;
+-    uint32_t numBuffers = m->numBuffers;
+-    if (usage & GRALLOC_USAGE_HW_FB && (bufferMask < ((1LU << numBuffers) - 1))) {
++    if (usage & GRALLOC_USAGE_HW_FB) {
+         err = gralloc_alloc_framebuffer(size, usage, pHandle);
+     } else {
+         err = gralloc_alloc_buffer(size, usage, pHandle, bufferType,
+-                                   grallocFormat, alignedw, alignedh);
++                                   format, alignedw, alignedh);
+     }
+ 
+     if (err < 0) {
+@@ -264,7 +245,7 @@ int gpu_context_t::free_impl(private_handle_t const* hnd) {
+         m->bufferMask &= ~(1<<index);
+     } else {
+         terminateBuffer(&m->base, const_cast<private_handle_t*>(hnd));
+-        IMemAlloc* memalloc = mAllocCtrl->getAllocator(hnd->flags);
++        sp<IMemAlloc> memalloc = mAllocCtrl->getAllocator(hnd->flags);
+         int err = memalloc->free_buffer((void*)hnd->base, (size_t) hnd->size,
+                                         hnd->offset, hnd->fd);
+         if(err)
+diff --git a/libgralloc/gpu.h b/libgralloc/gpu.h
+index 2920d5f..487f4d1 100644
+--- a/libgralloc/gpu.h
++++ b/libgralloc/gpu.h
+@@ -25,6 +25,7 @@
+ 
+ #include <cutils/log.h>
+ #include <cutils/ashmem.h>
++#include <utils/RefBase.h>
+ 
+ #include "gralloc_priv.h"
+ #include <fb_priv.h>
+@@ -34,7 +35,7 @@ class IAllocController;
+ class gpu_context_t : public alloc_device_t {
+     public:
+     gpu_context_t(const private_module_t* module,
+-                  IAllocController* alloc_ctrl);
++                  android::sp<IAllocController>alloc_ctrl);
+ 
+     int gralloc_alloc_framebuffer_locked(size_t size, int usage,
+                                          buffer_handle_t* pHandle);
+@@ -68,8 +69,9 @@ class gpu_context_t : public alloc_device_t {
+     static int gralloc_close(struct hw_device_t *dev);
+ 
+     private:
+-   IAllocController* mAllocCtrl;
++    android::sp<IAllocController> mAllocCtrl;
+     void getGrallocInformationFromFormat(int inputFormat,
++                                         int *colorFormat,
+                                          int *bufferType);
+ };
+ }
+diff --git a/libgralloc/gralloc.cpp b/libgralloc/gralloc.cpp
+index 7924ae3..950b1d6 100644
+--- a/libgralloc/gralloc.cpp
++++ b/libgralloc/gralloc.cpp
+@@ -23,6 +23,7 @@
+ #include <sys/types.h>
+ #include <sys/ioctl.h>
+ #include <cutils/properties.h>
++#include <utils/RefBase.h>
+ 
+ #include <linux/android_pmem.h>
+ 
+@@ -32,6 +33,7 @@
+ #include "alloc_controller.h"
+ 
+ using namespace gralloc;
++using android::sp;
+ 
+ int fb_device_open(const hw_module_t* module, const char* name,
+                    hw_device_t** device);
+@@ -97,10 +99,9 @@ int gralloc_device_open(const hw_module_t* module, const char* name,
+ {
+     int status = -EINVAL;
+     if (!strcmp(name, GRALLOC_HARDWARE_GPU0)) {
+-        const private_module_t* m = reinterpret_cast<const private_module_t*>(
+-            module);
++	const private_module_t* m = reinterpret_cast<const private_module_t*>(module);
+         gpu_context_t *dev;
+-        IAllocController* alloc_ctrl = IAllocController::getInstance();
++        IAllocController* alloc_ctrl = IAllocController::getInstance(true);
+         dev = new gpu_context_t(m, alloc_ctrl);
+         *device = &dev->common;
+         status = 0;
+diff --git a/libgralloc/gralloc_priv.h b/libgralloc/gralloc_priv.h
+index 59fbd30..7cdaa5f 100644
+--- a/libgralloc/gralloc_priv.h
++++ b/libgralloc/gralloc_priv.h
+@@ -34,22 +34,33 @@ enum {
+     /* gralloc usage bits indicating the type
+      * of allocation that should be used */
+ 
+-    /* SYSTEM heap comes from kernel vmalloc,
+-     * can never be uncached, is not secured*/
+-    GRALLOC_USAGE_PRIVATE_SYSTEM_HEAP     =       GRALLOC_USAGE_PRIVATE_0,
++    /* ADSP heap is deprecated, use only if using pmem */
++    GRALLOC_USAGE_PRIVATE_ADSP_HEAP       =       GRALLOC_USAGE_PRIVATE_0,
+     /* SF heap is used for application buffers, is not secured */
+     GRALLOC_USAGE_PRIVATE_UI_CONTIG_HEAP  =       GRALLOC_USAGE_PRIVATE_1,
++    /* SMI heap is deprecated, use only if using pmem */
++    GRALLOC_USAGE_PRIVATE_SMI_HEAP        =       GRALLOC_USAGE_PRIVATE_2,
++    /* SYSTEM heap comes from kernel vmalloc,
++     * can never be uncached, is not secured*/
++    GRALLOC_USAGE_PRIVATE_SYSTEM_HEAP     =       GRALLOC_USAGE_PRIVATE_3,
+     /* IOMMU heap comes from manually allocated pages,
+      * can be cached/uncached, is not secured */
+-    GRALLOC_USAGE_PRIVATE_IOMMU_HEAP      =       GRALLOC_USAGE_PRIVATE_2,
++    GRALLOC_USAGE_PRIVATE_IOMMU_HEAP      =       0x01000000,
+     /* MM heap is a carveout heap for video, can be secured*/
+-    GRALLOC_USAGE_PRIVATE_MM_HEAP         =       GRALLOC_USAGE_PRIVATE_3,
++    GRALLOC_USAGE_PRIVATE_MM_HEAP         =       0x02000000,
++    /* WRITEBACK heap is a carveout heap for writeback, can be secured*/
++    GRALLOC_USAGE_PRIVATE_WRITEBACK_HEAP  =       0x04000000,
+     /* CAMERA heap is a carveout heap for camera, is not secured*/
+-    GRALLOC_USAGE_PRIVATE_CAMERA_HEAP     =       0x01000000,
++    GRALLOC_USAGE_PRIVATE_CAMERA_HEAP     =       0x08000000,
+ 
+     /* Set this for allocating uncached memory (using O_DSYNC)
+      * cannot be used with noncontiguous heaps */
+-    GRALLOC_USAGE_PRIVATE_UNCACHED        =       0x02000000,
++    GRALLOC_USAGE_PRIVATE_UNCACHED        =       0x00100000,
++
++    /* This flag needs to be set when using a non-contiguous heap from ION.
++     * If not set, the system heap is assumed to be coming from ashmem
++     */
++    GRALLOC_USAGE_PRIVATE_ION             =       0x00200000,
+ 
+     /* This flag can be set to disable genlock synchronization
+      * for the gralloc buffer. If this flag is set the caller
+@@ -57,25 +68,28 @@ enum {
+      * WARNING - flag is outside the standard PRIVATE region
+      * and may need to be moved if the gralloc API changes
+      */
+-    GRALLOC_USAGE_PRIVATE_UNSYNCHRONIZED  =       0X04000000,
++    GRALLOC_USAGE_PRIVATE_UNSYNCHRONIZED  =       0X00400000,
++
++    /* Set this flag when you need to avoid mapping the memory in userspace */
++    GRALLOC_USAGE_PRIVATE_DO_NOT_MAP      =       0X00800000,
+ 
+     /* Buffer content should be displayed on an external display only */
+-    GRALLOC_USAGE_PRIVATE_EXTERNAL_ONLY   =       0x08000000,
++    GRALLOC_USAGE_PRIVATE_EXTERNAL_ONLY   =       0x00010000,
+ 
+     /* Only this buffer content should be displayed on external, even if
+      * other EXTERNAL_ONLY buffers are available. Used during suspend.
+      */
+-    GRALLOC_USAGE_PRIVATE_EXTERNAL_BLOCK  =       0x00100000,
++    GRALLOC_USAGE_PRIVATE_EXTERNAL_BLOCK  =       0x00020000,
+ 
+     /* Close Caption displayed on an external display only */
+-    GRALLOC_USAGE_PRIVATE_EXTERNAL_CC     =       0x00200000,
++    GRALLOC_USAGE_PRIVATE_EXTERNAL_CC     =       0x00040000,
+ 
+     /* Use this flag to request content protected buffers. Please note
+      * that this flag is different from the GRALLOC_USAGE_PROTECTED flag
+      * which can be used for buffers that are not secured for DRM
+      * but still need to be protected from screen captures
+      */
+-    GRALLOC_USAGE_PRIVATE_CP_BUFFER       =       0x00400000,
++    GRALLOC_USAGE_PRIVATE_CP_BUFFER       =       0x00080000,
+ };
+ 
+ enum {
+@@ -84,19 +98,21 @@ enum {
+     GRALLOC_MODULE_PERFORM_CREATE_HANDLE_FROM_BUFFER = 0x080000001,
+ };
+ 
+-#define GRALLOC_HEAP_MASK   (GRALLOC_USAGE_PRIVATE_UI_CONTIG_HEAP |\
+-                             GRALLOC_USAGE_PRIVATE_SYSTEM_HEAP    |\
+-                             GRALLOC_USAGE_PRIVATE_IOMMU_HEAP     |\
+-                             GRALLOC_USAGE_PRIVATE_MM_HEAP        |\
+-                             GRALLOC_USAGE_PRIVATE_CAMERA_HEAP)
+ 
+ #define INTERLACE_MASK 0x80
+ #define S3D_FORMAT_MASK 0xFF000
++#define DEVICE_PMEM "/dev/pmem"
++#define DEVICE_PMEM_ADSP "/dev/pmem_adsp"
++#define DEVICE_PMEM_SMIPOOL "/dev/pmem_smipool"
+ /*****************************************************************************/
+ enum {
+     /* OEM specific HAL formats */
+     HAL_PIXEL_FORMAT_NV12_ENCODEABLE        = 0x102,
++#ifdef QCOM_ICS_COMPAT
++    HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED     = 0x108,
++#else
+     HAL_PIXEL_FORMAT_YCbCr_420_SP_TILED     = 0x7FA30C03,
++#endif
+     HAL_PIXEL_FORMAT_YCbCr_420_SP           = 0x109,
+     HAL_PIXEL_FORMAT_YCrCb_420_SP_ADRENO    = 0x7FA30C01,
+     HAL_PIXEL_FORMAT_YCrCb_422_SP           = 0x10B,
+@@ -157,9 +173,6 @@ struct private_handle_t : public native_handle {
+             PRIV_FLAGS_EXTERNAL_BLOCK     = 0x00004000,
+             // Display this buffer on external as close caption
+             PRIV_FLAGS_EXTERNAL_CC        = 0x00008000,
+-            PRIV_FLAGS_VIDEO_ENCODER      = 0x00010000,
+-            PRIV_FLAGS_CAMERA_WRITE       = 0x00020000,
+-            PRIV_FLAGS_CAMERA_READ        = 0x00040000,
+         };
+ 
+         // file-descriptors
+@@ -176,7 +189,7 @@ struct private_handle_t : public native_handle {
+         // The gpu address mapped into the mmu.
+         // If using ashmem, set to 0, they don't care
+         int     gpuaddr;
+-        int     pid;   // deprecated
++        int     pid;
+         int     format;
+         int     width;
+         int     height;
+@@ -193,7 +206,7 @@ struct private_handle_t : public native_handle {
+             fd(fd), genlockHandle(-1), magic(sMagic),
+             flags(flags), size(size), offset(0),
+             bufferType(bufferType), base(0), gpuaddr(0),
+-            pid(0), format(format),
++            pid(getpid()), format(format),
+             width(width), height(height), genlockPrivFd(-1)
+         {
+             version = sizeof(native_handle);
+diff --git a/libgralloc/ionalloc.cpp b/libgralloc/ionalloc.cpp
+index 8af5a96..1ebbdfd 100644
+--- a/libgralloc/ionalloc.cpp
++++ b/libgralloc/ionalloc.cpp
+@@ -27,7 +27,7 @@
+  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-#define DEBUG 0
++
+ #include <linux/ioctl.h>
+ #include <sys/mman.h>
+ #include <stdlib.h>
+@@ -118,7 +118,9 @@ int IonAlloc::alloc_buffer(alloc_data& data)
+         return err;
+     }
+ 
+-    if(!(data.flags & ION_SECURE)) {
++    if(!(data.flags & ION_SECURE) &&
++       !(data.allocType & private_handle_t::PRIV_FLAGS_NOT_MAPPED)) {
++
+         base = mmap(0, ionAllocData.len, PROT_READ|PROT_WRITE,
+                     MAP_SHARED, fd_data.fd, 0);
+         if(base == MAP_FAILED) {
+@@ -126,6 +128,8 @@ int IonAlloc::alloc_buffer(alloc_data& data)
+             ALOGE("%s: Failed to map the allocated memory: %s",
+                   __FUNCTION__, strerror(errno));
+             ioctl(mIonFd, ION_IOC_FREE, &handle_data);
++            if(ionSyncFd >= 0)
++                close(ionSyncFd);
+             ionSyncFd = FD_INIT;
+             return err;
+         }
+@@ -142,7 +146,7 @@ int IonAlloc::alloc_buffer(alloc_data& data)
+     data.base = base;
+     data.fd = fd_data.fd;
+     ioctl(mIonFd, ION_IOC_FREE, &handle_data);
+-    ALOGD_IF(DEBUG, "ion: Allocated buffer base:%p size:%d fd:%d",
++    ALOGV("ion: Allocated buffer base:%p size:%d fd:%d",
+           data.base, ionAllocData.len, data.fd);
+     return 0;
+ }
+@@ -151,7 +155,7 @@ int IonAlloc::alloc_buffer(alloc_data& data)
+ int IonAlloc::free_buffer(void* base, size_t size, int offset, int fd)
+ {
+     Locker::Autolock _l(mLock);
+-    ALOGD_IF(DEBUG, "ion: Freeing buffer base:%p size:%d fd:%d",
++    ALOGV("ion: Freeing buffer base:%p size:%d fd:%d",
+           base, size, fd);
+     int err = 0;
+     err = open_device();
+@@ -179,10 +183,10 @@ int IonAlloc::map_buffer(void **pBase, size_t size, int offset, int fd)
+     *pBase = base;
+     if(base == MAP_FAILED) {
+         err = -errno;
+-        ALOGE("ion: Failed to map memory in the client: %s",
++        ALOGD("ion: Failed to map memory in the client: %s",
+               strerror(errno));
+     } else {
+-        ALOGD_IF(DEBUG, "ion: Mapped buffer base:%p size:%d offset:%d fd:%d",
++        ALOGV("ion: Mapped buffer base:%p size:%d offset:%d fd:%d",
+               base, size, offset, fd);
+     }
+     return err;
+@@ -190,7 +194,7 @@ int IonAlloc::map_buffer(void **pBase, size_t size, int offset, int fd)
+ 
+ int IonAlloc::unmap_buffer(void *base, size_t size, int offset)
+ {
+-    ALOGD_IF(DEBUG, "ion: Unmapping buffer  base:%p size:%d", base, size);
++    ALOGV("ion: Unmapping buffer  base:%p size:%d", base, size);
+     int err = 0;
+     if(munmap(base, size)) {
+         err = -errno;
+diff --git a/libgralloc/ionalloc.h b/libgralloc/ionalloc.h
+index 58a490e..083f106 100644
+--- a/libgralloc/ionalloc.h
++++ b/libgralloc/ionalloc.h
+@@ -30,9 +30,11 @@
+ #ifndef GRALLOC_IONALLOC_H
+ #define GRALLOC_IONALLOC_H
+ 
+-#include <linux/msm_ion.h>
+ #include "memalloc.h"
+ #include "gr.h"
++//#include <linux/ion.h>
++//XXX: Move to bionic
++#include "ion_msm.h"
+ 
+ namespace gralloc {
+ 
+diff --git a/libgralloc/mapper.cpp b/libgralloc/mapper.cpp
+index 3088ecc..4249f3f 100644
+--- a/libgralloc/mapper.cpp
++++ b/libgralloc/mapper.cpp
+@@ -44,14 +44,15 @@
+ #include "memalloc.h"
+ 
+ using namespace gralloc;
++using android::sp;
+ /*****************************************************************************/
+ 
+ // Return the type of allocator -
+ // these are used for mapping/unmapping
+-static IMemAlloc* getAllocator(int flags)
++static sp<IMemAlloc> getAllocator(int flags)
+ {
+-    IMemAlloc* memalloc;
+-    IAllocController* alloc_ctrl = IAllocController::getInstance();
++    sp<IMemAlloc> memalloc;
++    sp<IAllocController> alloc_ctrl = IAllocController::getInstance(true);
+     memalloc = alloc_ctrl->getAllocator(flags);
+     return memalloc;
+ }
+@@ -65,7 +66,7 @@ static int gralloc_map(gralloc_module_t const* module,
+     if (!(hnd->flags & private_handle_t::PRIV_FLAGS_FRAMEBUFFER) &&
+         !(hnd->flags & private_handle_t::PRIV_FLAGS_SECURE_BUFFER)) {
+         size_t size = hnd->size;
+-        IMemAlloc* memalloc = getAllocator(hnd->flags) ;
++        sp<IMemAlloc> memalloc = getAllocator(hnd->flags) ;
+         int err = memalloc->map_buffer(&mappedAddress, size,
+                                        hnd->offset, hnd->fd);
+         if(err) {
+@@ -97,7 +98,7 @@ static int gralloc_unmap(gralloc_module_t const* module,
+         int err = -EINVAL;
+         void* base = (void*)hnd->base;
+         size_t size = hnd->size;
+-        IMemAlloc* memalloc = getAllocator(hnd->flags) ;
++        sp<IMemAlloc> memalloc = getAllocator(hnd->flags) ;
+         if(memalloc != NULL)
+             err = memalloc->unmap_buffer(base, size, hnd->offset);
+         if (err) {
+@@ -129,32 +130,35 @@ int gralloc_register_buffer(gralloc_module_t const* module,
+      * out-of-line
+      */
+ 
++    // if this handle was created in this process, then we keep it as is.
+     private_handle_t* hnd = (private_handle_t*)handle;
+-    hnd->base = 0;
+-    void *vaddr;
+-    int err = gralloc_map(module, handle, &vaddr);
+-    if (err) {
+-        ALOGE("%s: gralloc_map failed", __FUNCTION__);
+-        return err;
+-    }
++    if (hnd->pid != getpid()) {
++        hnd->base = 0;
++        void *vaddr;
++        int err = gralloc_map(module, handle, &vaddr);
++        if (err) {
++            ALOGE("%s: gralloc_map failed", __FUNCTION__);
++            return err;
++        }
+ 
+-    // Reset the genlock private fd flag in the handle
+-    hnd->genlockPrivFd = -1;
++        // Reset the genlock private fd flag in the handle
++        hnd->genlockPrivFd = -1;
+ 
+-    // Check if there is a valid lock attached to the handle.
+-    if (-1 == hnd->genlockHandle) {
+-        ALOGE("%s: the lock is invalid.", __FUNCTION__);
+-        gralloc_unmap(module, handle);
+-        hnd->base = 0;
+-        return -EINVAL;
+-    }
++        // Check if there is a valid lock attached to the handle.
++        if (-1 == hnd->genlockHandle) {
++            ALOGE("%s: the lock is invalid.", __FUNCTION__);
++            gralloc_unmap(module, handle);
++            hnd->base = 0;
++            return -EINVAL;
++        }
+ 
+-    // Attach the genlock handle
+-    if (GENLOCK_NO_ERROR != genlock_attach_lock((native_handle_t *)handle)) {
+-        ALOGE("%s: genlock_attach_lock failed", __FUNCTION__);
+-        gralloc_unmap(module, handle);
+-        hnd->base = 0;
+-        return -EINVAL;
++        // Attach the genlock handle
++        if (GENLOCK_NO_ERROR != genlock_attach_lock((native_handle_t *)handle)) {
++            ALOGE("%s: genlock_attach_lock failed", __FUNCTION__);
++            gralloc_unmap(module, handle);
++            hnd->base = 0;
++            return -EINVAL;
++        }
+     }
+     return 0;
+ }
+@@ -173,16 +177,19 @@ int gralloc_unregister_buffer(gralloc_module_t const* module,
+ 
+     private_handle_t* hnd = (private_handle_t*)handle;
+ 
+-    if (hnd->base != 0) {
+-        gralloc_unmap(module, handle);
+-    }
+-    hnd->base = 0;
+-    // Release the genlock
+-    if (-1 != hnd->genlockHandle) {
+-        return genlock_release_lock((native_handle_t *)handle);
+-    } else {
+-        ALOGE("%s: there was no genlock attached to this buffer", __FUNCTION__);
+-        return -EINVAL;
++    // never unmap buffers that were created in this process
++    if (hnd->pid != getpid()) {
++        if (hnd->base != 0) {
++            gralloc_unmap(module, handle);
++        }
++        hnd->base = 0;
++        // Release the genlock
++        if (-1 != hnd->genlockHandle) {
++            return genlock_release_lock((native_handle_t *)handle);
++        } else {
++            ALOGE("%s: there was no genlock attached to this buffer", __FUNCTION__);
++            return -EINVAL;
++        }
+     }
+     return 0;
+ }
+@@ -201,7 +208,12 @@ int terminateBuffer(gralloc_module_t const* module,
+                           private_handle_t::PRIV_FLAGS_USES_PMEM_ADSP |
+                           private_handle_t::PRIV_FLAGS_USES_ASHMEM |
+                           private_handle_t::PRIV_FLAGS_USES_ION)) {
++            if (hnd->pid != getpid()) {
++                // ... unless it's a "master" pmem buffer, that is a buffer
++                // mapped in the process it's been allocated.
++                // (see gralloc_alloc_buffer())
+                 gralloc_unmap(module, hnd);
++            }
+         } else {
+             ALOGE("terminateBuffer: unmapping a non pmem/ashmem buffer flags = 0x%x",
+                   hnd->flags);
+@@ -272,7 +284,7 @@ int gralloc_unlock(gralloc_module_t const* module,
+ 
+     if (hnd->flags & private_handle_t::PRIV_FLAGS_NEEDS_FLUSH) {
+         int err;
+-        IMemAlloc* memalloc = getAllocator(hnd->flags) ;
++        sp<IMemAlloc> memalloc = getAllocator(hnd->flags) ;
+         err = memalloc->clean_buffer((void*)hnd->base,
+                                      hnd->size, hnd->offset, hnd->fd);
+         ALOGE_IF(err < 0, "cannot flush handle %p (offs=%x len=%x, flags = 0x%x) err=%s\n",
+@@ -316,7 +328,25 @@ int gralloc_perform(struct gralloc_module_t const* module,
+                     private_handle_t::sNumFds, private_handle_t::sNumInts);
+                 hnd->magic = private_handle_t::sMagic;
+                 hnd->fd = fd;
+-                hnd->flags =  private_handle_t::PRIV_FLAGS_USES_ION;
++                unsigned int contigFlags = GRALLOC_USAGE_PRIVATE_ADSP_HEAP |
++                    GRALLOC_USAGE_PRIVATE_UI_CONTIG_HEAP |
++                    GRALLOC_USAGE_PRIVATE_SMI_HEAP;
++
++                if (memoryFlags & contigFlags) {
++                    // check if the buffer is a pmem buffer
++                    pmem_region region;
++                    if (ioctl(fd, PMEM_GET_SIZE, &region) < 0)
++                        hnd->flags =  private_handle_t::PRIV_FLAGS_USES_ION;
++                    else
++                        hnd->flags =  private_handle_t::PRIV_FLAGS_USES_PMEM |
++                            private_handle_t::PRIV_FLAGS_DO_NOT_FLUSH;
++                } else {
++                    if (memoryFlags & GRALLOC_USAGE_PRIVATE_ION)
++                        hnd->flags =  private_handle_t::PRIV_FLAGS_USES_ION;
++                    else
++                        hnd->flags =  private_handle_t::PRIV_FLAGS_USES_ASHMEM;
++                }
++
+                 hnd->size = size;
+                 hnd->offset = offset;
+                 hnd->base = intptr_t(base) + offset;
+diff --git a/libgralloc/memalloc.h b/libgralloc/memalloc.h
+index af509fb..349078d 100644
+--- a/libgralloc/memalloc.h
++++ b/libgralloc/memalloc.h
+@@ -31,6 +31,7 @@
+ #define GRALLOC_MEMALLOC_H
+ 
+ #include <stdlib.h>
++#include <utils/RefBase.h>
+ 
+ namespace gralloc {
+ 
+@@ -46,7 +47,7 @@ struct alloc_data {
+     int            allocType;
+ };
+ 
+-class IMemAlloc {
++class IMemAlloc : public android::RefBase {
+ 
+     public:
+     // Allocate buffer - fill in the alloc_data
+diff --git a/libhwcomposer/hwc.cpp b/libhwcomposer/hwc.cpp
+index a2ea3c9..8a01cde 100644
+--- a/libhwcomposer/hwc.cpp
++++ b/libhwcomposer/hwc.cpp
+@@ -453,7 +453,19 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
+ 
+         //Setup HWC methods
+         dev->device.common.tag          = HARDWARE_DEVICE_TAG;
+-        dev->device.common.version      = HWC_DEVICE_API_VERSION_1_1;
++#ifndef NO_HW_VSYNC
++        //XXX: This disables hardware vsync on 8x55
++        // Fix when HW vsync is available on 8x55
++        if(dev->mMDP.version == 400 || (dev->mMDP.version >= 500)) {
++#endif
++            dev->device.common.version = 0;
++            ALOGI("%s: Hardware VSYNC not supported", __FUNCTION__);
++#ifndef NO_HW_VSYNC
++        } else {
++            dev->device.common.version = HWC_DEVICE_API_VERSION_0_3;
++            ALOGI("%s: Hardware VSYNC supported", __FUNCTION__);
++        }
++#endif
+         dev->device.common.module       = const_cast<hw_module_t*>(module);
+         dev->device.common.close        = hwc_device_close;
+         dev->device.prepare             = hwc_prepare;
+diff --git a/libhwcomposer/hwc_vsync.cpp b/libhwcomposer/hwc_vsync.cpp
+index d461a8b..61ad0cb 100644
+--- a/libhwcomposer/hwc_vsync.cpp
++++ b/libhwcomposer/hwc_vsync.cpp
+@@ -70,68 +70,29 @@ static void *vsync_loop(void *param)
+                strerror(errno));
+         return NULL;
+     }
+-
+-    do {
+-        pthread_mutex_lock(&ctx->vstate.lock);
+-        while (ctx->vstate.enable == false) {
+-            if(enabled) {
+-                int e = 0;
+-                if(ioctl(ctx->dpyAttr[dpy].fd, MSMFB_OVERLAY_VSYNC_CTRL,
+-                         &e) < 0) {
+-                    ALOGE("%s: vsync control failed. Dpy=%d, enabled=%d : %s",
+-                          __FUNCTION__, dpy, enabled, strerror(errno));
+-                    ret = -errno;
+-                }
+-                enabled = false;
+-            }
+-            pthread_cond_wait(&ctx->vstate.cond, &ctx->vstate.lock);
+-        }
+-        pthread_mutex_unlock(&ctx->vstate.lock);
+-
+-        if (!enabled) {
+-            int e = 1;
+-            if(ioctl(ctx->dpyAttr[dpy].fd, MSMFB_OVERLAY_VSYNC_CTRL,
+-                                          &e) < 0) {
+-                ALOGE("%s: vsync control failed. Dpy=%d, enabled=%d : %s",
+-                      __FUNCTION__, dpy, enabled, strerror(errno));
+-                ret = -errno;
+-            }
+-            enabled = true;
+-        }
+-
+-       for(int i = 0; i < MAX_RETRY_COUNT; i++) {
+-           len = pread(fd_timestamp, vdata, MAX_DATA, 0);
+-           if(len < 0 && (errno == EAGAIN || errno == EINTR)) {
+-               ALOGW("%s: vsync read: EAGAIN, retry (%d/%d).",
+-                     __FUNCTION__, i, MAX_RETRY_COUNT);
+-               continue;
+-           } else {
+-               break;
+-           }
+-       }
+-
+-       if (len < 0) {
++  // Open success - read now
++       len = read(fd_timestamp, vdata, PAGE_SIZE);
++       if (len < 0){
+            ALOGE ("FATAL:%s:not able to read file:%s, %s", __FUNCTION__,
+-                  vsync_timestamp_fb0, strerror(errno));
+-           close (fd_timestamp);
++                (fb1_vsync) ? vsync_timestamp_fb1 : vsync_timestamp_fb0,
++                                                        strerror(errno));
++           fd_timestamp = -1;
+            return NULL;
+        }
+ 
+-       // extract timestamp
+-       const char *str = vdata;
+-       if (!strncmp(str, "VSYNC=", strlen("VSYNC="))) {
++      // extract timestamp
++      const char *str = vdata;
++      if (!strncmp(str, "VSYNC=", strlen("VSYNC="))) {
+           cur_timestamp = strtoull(str + strlen("VSYNC="), NULL, 0);
+-       } else {
+-          ALOGE ("FATAL: %s: vsync timestamp not in correct format: [%s]",
+-                  __FUNCTION__,
+-                  str);
+-       }
+-       // send timestamp to HAL
+-       ALOGD_IF (VSYNC_DEBUG, "%s: timestamp %llu sent to HWC for %s",
+-            __FUNCTION__, cur_timestamp, "fb0");
+-       ctx->proc->vsync(ctx->proc, dpy, cur_timestamp);
++      } else {
++        ALOGE ("FATAL:%s:timestamp data not in correct format",
++                                                 __FUNCTION__);
++      }
++      // send timestamp to HAL
++      ALOGD_IF (VSYNC_DEBUG, "%s: timestamp %llu sent to HWC for %s",
++            __FUNCTION__, cur_timestamp, (fb1_vsync) ? "fb1" : "fb0");
++      ctx->proc->vsync(ctx->proc, 0, cur_timestamp);
+ 
+-    } while (true);
+     if(fd_timestamp >= 0)
+         close (fd_timestamp);
+ 
+diff --git a/liboverlay/mdpWrapper.h b/liboverlay/mdpWrapper.h
+index b1eb76c..40b8840 100644
+--- a/liboverlay/mdpWrapper.h
++++ b/liboverlay/mdpWrapper.h
+@@ -247,12 +247,6 @@ inline void dump(const char* const s, const msm_rotator_img_info& rot) {
+     dump("src_rect", rot.src_rect);
+ }
+ inline void dump(const char* const s, const msm_rotator_data_info& rot) {
+-    ALOGE("%s msm_rotator_data_info sessid=%d verkey=%d",
+-            s, rot.session_id, rot.version_key);
+-    dump("src", rot.src);
+-    dump("dst", rot.dst);
+-    dump("src_chroma", rot.src_chroma);
+-    dump("dst_chroma", rot.dst_chroma);
+ }
+ inline void dump(const char* const s, const fb_fix_screeninfo& finfo) {
+     ALOGE("%s fb_fix_screeninfo type=%d", s, finfo.type);
+diff --git a/liboverlay/overlayMem.h b/liboverlay/overlayMem.h
+index 60ed8fe..af66825 100644
+--- a/liboverlay/overlayMem.h
++++ b/liboverlay/overlayMem.h
+@@ -108,7 +108,7 @@ inline OvMem::OvMem() {
+     mAllocType = 0;
+     mBufSz = 0;
+     mNumBuffers = 0;
+-    mAlloc = gralloc::IAllocController::getInstance();
++    mAlloc = gralloc::IAllocController::getInstance(false);
+ }
+ 
+ inline OvMem::~OvMem() { }
+@@ -136,12 +136,12 @@ inline bool OvMem::open(uint32_t numbufs,
+     data.align = getpagesize();
+     data.uncached = true;
+ 
+-    err = mAlloc->allocate(data, allocFlags);
++    err = mAlloc->allocate(data, allocFlags, 0);
+     //see if we can fallback to other heap
+     //we can try MM_HEAP once if it's not secure playback
+     if (err != 0 && !isSecure) {
+         allocFlags |= GRALLOC_USAGE_PRIVATE_MM_HEAP;
+-        err = mAlloc->allocate(data, allocFlags);
++        err = mAlloc->allocate(data, allocFlags, 0);
+         if (err != 0) {
+             ALOGE(" could not allocate from fallback heap");
+             return false;
+diff --git a/liboverlay/overlayRotator.h b/liboverlay/overlayRotator.h
+index 075e46d..f5538db 100644
+--- a/liboverlay/overlayRotator.h
++++ b/liboverlay/overlayRotator.h
+@@ -448,7 +448,7 @@ inline uint32_t MdssRot::getDstOffset() const {
+ }
+ inline uint32_t MdssRot::getSessId() const { return mRotInfo.id; }
+ inline void MdssRot::setSrcFB() {
+-    mRotData.data.flags |= MDP_MEMORY_ID_TYPE_FB;
++    mRotData.dst_data.flags |= MDP_MEMORY_ID_TYPE_FB;
+ }
+ 
+ } // overlay
