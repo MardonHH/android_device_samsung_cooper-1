@@ -1,3 +1,15 @@
+diff --git a/include/gui/SurfaceComposerClient.h b/include/gui/SurfaceComposerClient.h
+index a8bab55..b57a9a4 100644
+--- a/include/gui/SurfaceComposerClient.h
++++ b/include/gui/SurfaceComposerClient.h
+@@ -65,6 +65,7 @@ public:
+             void* cookie = NULL, uint32_t flags = 0);
+ 
+     // Get information about a display
++    static status_t getDisplayInfo(int32_t dpy, DisplayInfo* info);
+     static status_t getDisplayInfo(const sp<IBinder>& display, DisplayInfo* info);
+ 
+     /* triggers screen off and waits for it to complete */
 diff --git a/include/ui/Overlay.h b/include/ui/Overlay.h
 index e69de29..6647e92 100644
 --- a/include/ui/Overlay.h
@@ -106,6 +118,21 @@ index e69de29..6647e92 100644
 +}; // namespace android
 +
 +#endif // ANDROID_OVERLAY_H
+diff --git a/libs/gui/SurfaceComposerClient.cpp b/libs/gui/SurfaceComposerClient.cpp
+index 8029600..bc16f34 100644
+--- a/libs/gui/SurfaceComposerClient.cpp
++++ b/libs/gui/SurfaceComposerClient.cpp
+@@ -568,6 +568,10 @@ void SurfaceComposerClient::setDisplayProjection(const sp<IBinder>& token,
+ }
+ 
+ // ----------------------------------------------------------------------------
++status_t SurfaceComposerClient::getDisplayInfo(int32_t dpy, DisplayInfo* info)
++{
++    return getDisplayInfo(ComposerService::getComposerService()->getBuiltInDisplay(dpy), info);
++}
+ 
+ status_t SurfaceComposerClient::getDisplayInfo(
+         const sp<IBinder>& display, DisplayInfo* info)
 diff --git a/libs/ui/Android.mk b/libs/ui/Android.mk
 index 0d2e44c..86fb745 100644
 --- a/libs/ui/Android.mk
