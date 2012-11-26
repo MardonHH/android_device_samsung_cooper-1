@@ -41,7 +41,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     audio_policy.cooper \
     audio.primary.cooper \
-    libaudioutils
+    libaudioutils \
+    libcyanogen-dsp
 
 ## Camera
 PRODUCT_PACKAGES += \
@@ -133,10 +134,10 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/etc/AutoVolumeControl.txt:system/etc/AutoVolumeControl.txt \
     device/samsung/cooper/prebuilt/system/etc/AudioFilter.csv:system/etc/AudioFilter.csv \
     device/samsung/cooper/prebuilt/system/etc/audio_policy.conf:system/etc/audio_policy.conf \
-    device/samsung/cooper/prebuilt/system/etc/audio_effects.conf:system/etc/audio_effects.conf \
     device/samsung/cooper/prebuilt/system/etc/hosts:system/etc/hosts \
     device/samsung/cooper/prebuilt/system/etc/sysctl.conf:system/etc/sysctl.conf \
-    device/samsung/cooper/prebuilt/system/etc/media_profiles.xml:system/etc/media_profiles.xml
+    device/samsung/cooper/prebuilt/system/etc/media_profiles.xml:system/etc/media_profiles.xml \
+    device/samsung/cooper/prebuilt/system/etc/media_codecs.xml:system/etc/media_codecs.xml
 
 ## Omx
 PRODUCT_COPY_FILES += \
@@ -232,12 +233,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/system/lib/libsec-ril.so:system/lib/libsec-ril.so \
     device/samsung/cooper/prebuilt/system/lib/libsecril-client.so:system/lib/libsecril-client.so \
     device/samsung/cooper/prebuilt/system/lib/libril.so:system/lib/libril.so
-
-# Misc packages
-PRODUCT_PACKAGES += \
-	Torch \
-	Gallery2
-
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.rommanager.developerid=cyanogenmod \

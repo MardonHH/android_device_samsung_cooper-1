@@ -84,6 +84,7 @@ PRODUCT_PACKAGES += \
 # Custom CM packages
 PRODUCT_PACKAGES += \
     Trebuchet \
+    Torch \
     audio_effects.conf
 
 # Extra tools in CM

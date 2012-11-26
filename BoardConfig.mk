@@ -58,6 +58,7 @@ ENABLE_JSC_JIT := true
 BOARD_USE_NASTY_PTHREAD_CREATE_HACK := true
 BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
+TARGET_NO_HW_VSYNC := true
 BOARD_EGL_CFG := device/samsung/cooper/prebuilt/system/lib/egl/egl.cfg
 USE_OPENGL_RENDERER := true
 	
