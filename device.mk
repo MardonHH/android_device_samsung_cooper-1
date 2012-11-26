@@ -257,7 +257,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.modversion=CyanogenMod9.1
 
 PRODUCT_COPY_FILES += \
-	device/samsung/cooper/prebuilt/system/media/bootanimation.zip:system/media/bootanimation.zip \
+	vendor/cm/prebuilt/common/bootanimation/320.zip:system/media/bootanimation.zip \
         device/samsung/cooper/prebuilt/system/app/Talk.apk:system/app/Talk.apk \
 	device/samsung/cooper/prebuilt/system/app/PlayStore.apk:system/app/PlayStore.apk 
 
