@@ -1,3 +1,261 @@
+diff --git a/camera/CameraParameters.cpp b/camera/CameraParameters.cpp
+index fd91bf2..3395bb2 100644
+--- a/camera/CameraParameters.cpp
++++ b/camera/CameraParameters.cpp
+@@ -26,6 +26,9 @@ namespace android {
+ // Parameter keys to communicate between camera application and driver.
+ const char CameraParameters::KEY_PREVIEW_SIZE[] = "preview-size";
+ const char CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES[] = "preview-size-values";
++#ifdef QCOM_HARDWARE
++const char CameraParameters::KEY_PREVIEW_FRAME_RATE_MODE[] = "preview-frame-rate-mode";
++#endif
+ const char CameraParameters::KEY_PREVIEW_FORMAT[] = "preview-format";
+ const char CameraParameters::KEY_SUPPORTED_PREVIEW_FORMATS[] = "preview-format-values";
+ const char CameraParameters::KEY_PREVIEW_FRAME_RATE[] = "preview-frame-rate";
+@@ -51,6 +54,12 @@ const char CameraParameters::KEY_WHITE_BALANCE[] = "whitebalance";
+ const char CameraParameters::KEY_SUPPORTED_WHITE_BALANCE[] = "whitebalance-values";
+ const char CameraParameters::KEY_EFFECT[] = "effect";
+ const char CameraParameters::KEY_SUPPORTED_EFFECTS[] = "effect-values";
++#ifdef QCOM_HARDWARE
++const char CameraParameters::KEY_TOUCH_AF_AEC[] = "touch-af-aec";
++const char CameraParameters::KEY_SUPPORTED_TOUCH_AF_AEC[] = "touch-af-aec-values";
++const char CameraParameters::KEY_TOUCH_INDEX_AEC[] = "touch-index-aec";
++const char CameraParameters::KEY_TOUCH_INDEX_AF[] = "touch-index-af";
++#endif
+ const char CameraParameters::KEY_ANTIBANDING[] = "antibanding";
+ const char CameraParameters::KEY_SUPPORTED_ANTIBANDING[] = "antibanding-values";
+ const char CameraParameters::KEY_SCENE_MODE[] = "scene-mode";
+@@ -407,6 +416,19 @@ void CameraParameters::getPreviewFpsRange(int *min_fps, int *max_fps) const
+     parse_pair(p, min_fps, max_fps, ',');
+ }
+ 
++#ifdef QCOM_HARDWARE
++void CameraParameters::setPreviewFrameRateMode(const char *mode)
++{
++    set(KEY_PREVIEW_FRAME_RATE_MODE, mode);
++}
++
++const char *CameraParameters::getPreviewFrameRateMode() const
++{
++    return get(KEY_PREVIEW_FRAME_RATE_MODE);
++}
++
++#endif
++
+ void CameraParameters::setPreviewFormat(const char *format)
+ {
+     set(KEY_PREVIEW_FORMAT, format);
+@@ -459,6 +481,55 @@ void CameraParameters::dump() const
+         ALOGD("%s: %s\n", k.string(), v.string());
+     }
+ }
++#ifdef QCOM_HARDWARE
++void CameraParameters::setTouchIndexAec(int x, int y)
++{
++    char str[32];
++    snprintf(str, sizeof(str), "%dx%d", x, y);
++    set(KEY_TOUCH_INDEX_AEC, str);
++}
++
++void CameraParameters::getTouchIndexAec(int *x, int *y) const
++{
++    *x = -1;
++    *y = -1;
++
++    // Get the current string, if it doesn't exist, leave the -1x-1
++    const char *p = get(KEY_TOUCH_INDEX_AEC);
++    if (p == 0)
++        return;
++
++    int tempX, tempY;
++    if (parse_pair(p, &tempX, &tempY, 'x') == 0) {
++        *x = tempX;
++        *y = tempY;
++    }
++}
++
++void CameraParameters::setTouchIndexAf(int x, int y)
++{
++    char str[32];
++    snprintf(str, sizeof(str), "%dx%d", x, y);
++    set(KEY_TOUCH_INDEX_AF, str);
++}
++
++void CameraParameters::getTouchIndexAf(int *x, int *y) const
++{
++    *x = -1;
++    *y = -1;
++
++    // Get the current string, if it doesn't exist, leave the -1x-1
++    const char *p = get(KEY_TOUCH_INDEX_AF);
++    if (p == 0)
++        return;
++
++    int tempX, tempY;
++    if (parse_pair(p, &tempX, &tempY, 'x') == 0) {
++        *x = tempX;
++        *y = tempY;
++    }
++}
++#endif
+ 
+ status_t CameraParameters::dump(int fd, const Vector<String16>& args) const
+ {
+diff --git a/include/camera/CameraParameters.h b/include/camera/CameraParameters.h
+index 5540d32..6d47598 100644
+--- a/include/camera/CameraParameters.h
++++ b/include/camera/CameraParameters.h
+@@ -91,6 +91,10 @@ public:
+     void setPreviewFrameRate(int fps);
+     int getPreviewFrameRate() const;
+     void getPreviewFpsRange(int *min_fps, int *max_fps) const;
++#ifdef QCOM_HARDWARE
++    void setPreviewFrameRateMode(const char *mode);
++    const char *getPreviewFrameRateMode() const;
++#endif
+     void setPreviewFormat(const char *format);
+     const char *getPreviewFormat() const;
+     void setPictureSize(int width, int height);
+@@ -98,6 +102,13 @@ public:
+     void getSupportedPictureSizes(Vector<Size> &sizes) const;
+     void setPictureFormat(const char *format);
+     const char *getPictureFormat() const;
++#ifdef QCOM_HARDWARE
++    void setTouchIndexAec(int x, int y);
++    void getTouchIndexAec(int *x, int *y) const;
++    void setTouchIndexAf(int x, int y);
++    void getTouchIndexAf(int *x, int *y) const;
++#endif
++    //void getMeteringAreaCenter(int * x, int *y) const;
+ 
+     void dump() const;
+     status_t dump(int fd, const Vector<String16>& args) const;
+@@ -112,6 +123,8 @@ public:
+     // Supported preview frame sizes in pixels.
+     // Example value: "800x600,480x320". Read only.
+     static const char KEY_SUPPORTED_PREVIEW_SIZES[];
++
++    static const char KEY_PREVIEW_FRAME_RATE_MODE[];
+     // The current minimum and maximum preview fps. This controls the rate of
+     // preview frames received (CAMERA_MSG_PREVIEW_FRAME). The minimum and
+     // maximum fps must be one of the elements from
+@@ -222,6 +235,15 @@ public:
+     // Supported color effect settings.
+     // Example value: "none,mono,sepia". Read only.
+     static const char KEY_SUPPORTED_EFFECTS[];
++#ifdef QCOM_HARDWARE
++    //Touch Af/AEC settings.
++    static const char KEY_TOUCH_AF_AEC[];
++    static const char KEY_SUPPORTED_TOUCH_AF_AEC[];
++    //Touch Index for AEC.
++    static const char KEY_TOUCH_INDEX_AEC[];
++    //Touch Index for AF.
++    static const char KEY_TOUCH_INDEX_AF[];
++#endif
+     // Current antibanding setting.
+     // Example value: "auto" or ANTIBANDING_XXX constants. Read/write.
+     static const char KEY_ANTIBANDING[];
+diff --git a/media/libmedia/Android.mk b/media/libmedia/Android.mk
+index 54666fb..0c0a0a1 100644
+--- a/media/libmedia/Android.mk
++++ b/media/libmedia/Android.mk
+@@ -58,6 +58,14 @@ LOCAL_SHARED_LIBRARIES := \
+ 
+ LOCAL_WHOLE_STATIC_LIBRARY := libmedia_helper
+ 
++ifeq ($(BOARD_USES_AUDIO_LEGACY),true)
++    LOCAL_SRC_FILES+= \
++        AudioParameter.cpp
++
++    LOCAL_CFLAGS += -DUSES_AUDIO_LEGACY
++endif
++
++
+ LOCAL_MODULE:= libmedia
+ 
+ LOCAL_C_INCLUDES := \
+diff --git a/media/libmedia/AudioSystem.cpp b/media/libmedia/AudioSystem.cpp
+index 207f96f..8a7a652 100644
+--- a/media/libmedia/AudioSystem.cpp
++++ b/media/libmedia/AudioSystem.cpp
+@@ -773,5 +773,64 @@ void AudioSystem::AudioPolicyServiceClient::binderDied(const wp<IBinder>& who) {
+ 
+     ALOGW("AudioPolicyService server died!");
+ }
++#ifdef USES_AUDIO_LEGACY
++extern "C" uint32_t _ZN7android11AudioSystem8popCountEj(uint32_t u)
++{
++    return popcount(u);
++}
++
++extern "C" bool _ZN7android11AudioSystem12isA2dpDeviceENS0_13audio_devicesE(uint32_t device)
++{
++    return audio_is_a2dp_device((audio_devices_t)device);
++}
++
++extern "C" bool _ZN7android11AudioSystem13isInputDeviceENS0_13audio_devicesE(uint32_t device)
++{
++    return audio_is_input_device((audio_devices_t)device);
++}
++
++extern "C" bool _ZN7android11AudioSystem14isOutputDeviceENS0_13audio_devicesE(uint32_t device)
++{
++    return audio_is_output_device((audio_devices_t)device);
++}
++
++extern "C" bool _ZN7android11AudioSystem20isBluetoothScoDeviceENS0_13audio_devicesE(uint32_t device)
++{
++    return audio_is_bluetooth_sco_device((audio_devices_t)device);
++}
++
++extern "C" status_t _ZN7android11AudioSystem24setDeviceConnectionStateENS0_13audio_devicesENS0_23device_connection_stateEPKc(audio_devices_t device,
++                                               audio_policy_dev_state_t state,
++                                               const char *device_address) 
++{
++    return AudioSystem::setDeviceConnectionState(device, state, device_address);
++}
++
++extern "C" audio_io_handle_t _ZN7android11AudioSystem9getOutputENS0_11stream_typeEjjjNS0_12output_flagsE(audio_stream_type_t stream,
++                                    uint32_t samplingRate,
++                                    uint32_t format,
++                                    uint32_t channels,
++                                    audio_output_flags_t flags) 
++{
++   return AudioSystem::getOutput(stream,samplingRate,(audio_format_t)format,channels>>2,flags);
++}
++
++extern "C" bool _ZN7android11AudioSystem11isLinearPCMEj(uint32_t format)
++{
++    return audio_is_linear_pcm((audio_format_t)format);
++}
++
++extern "C" bool _ZN7android11AudioSystem15isLowVisibilityENS0_11stream_typeE(audio_stream_type_t stream)
++{
++    if (stream == AUDIO_STREAM_SYSTEM ||
++        stream == AUDIO_STREAM_NOTIFICATION ||
++        stream == AUDIO_STREAM_RING) {
++        return true;
++    } else {
++        return false;
++    }
++}
++
++#endif // AUDIO_LEGACY
+ 
+ }; // namespace android
+diff --git a/media/libmedia/MediaProfiles.cpp b/media/libmedia/MediaProfiles.cpp
+index 8319cd7..167d62c 100644
+--- a/media/libmedia/MediaProfiles.cpp
++++ b/media/libmedia/MediaProfiles.cpp
+@@ -443,7 +443,7 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char
+         profiles->mEncoderOutputFileFormats.add(createEncoderOutputFileFormat(atts));
+     } else if (strcmp("CamcorderProfiles", name) == 0) {
+         profiles->mCurrentCameraId = getCameraId(atts);
+-        profiles->addStartTimeOffset(profiles->mCurrentCameraId, atts);
++        //profiles->addStartTimeOffset(profiles->mCurrentCameraId, atts);
+     } else if (strcmp("EncoderProfile", name) == 0) {
+         profiles->mCamcorderProfiles.add(
+             createCamcorderProfile(profiles->mCurrentCameraId, atts, profiles->mCameraIds));
 diff --git a/media/libstagefright/CameraSource.cpp b/media/libstagefright/CameraSource.cpp
 index efd7af7..e59939b 100755
 --- a/media/libstagefright/CameraSource.cpp
@@ -20,6 +278,139 @@ index efd7af7..e59939b 100755
  
      if (mCameraFlags & FLAGS_HOT_CAMERA) {
          mCamera->unlock();
+diff --git a/services/audioflinger/AudioFlinger.cpp b/services/audioflinger/AudioFlinger.cpp
+index d811c23..5bd7c4a 100644
+--- a/services/audioflinger/AudioFlinger.cpp
++++ b/services/audioflinger/AudioFlinger.cpp
+@@ -6854,7 +6854,7 @@ audio_module_handle_t AudioFlinger::loadHwModule(const char *name)
+ 
+ // loadHwModule_l() must be called with AudioFlinger::mLock held
+ audio_module_handle_t AudioFlinger::loadHwModule_l(const char *name)
+-{
++{   
+     for (size_t i = 0; i < mAudioHwDevs.size(); i++) {
+         if (strncmp(mAudioHwDevs.valueAt(i)->moduleName(), name, strlen(name)) == 0) {
+             ALOGW("loadHwModule() module %s already loaded", name);
+@@ -6882,12 +6882,10 @@ audio_module_handle_t AudioFlinger::loadHwModule_l(const char *name)
+     // volume.  If this is the first HAL opened, and it supports the get
+     // methods, use the initial values provided by the HAL as the current
+     // master mute and volume settings.
+-
+     AudioHwDevice::Flags flags = static_cast<AudioHwDevice::Flags>(0);
+     {  // scope for auto-lock pattern
+         AutoMutex lock(mHardwareLock);
+-
+-#ifndef ICS_AUDIO_BLOB
++#ifdef AUDIO_BLOB_NEW
+         if (0 == mAudioHwDevs.size()) {
+             mHardwareStatus = AUDIO_HW_GET_MASTER_VOLUME;
+             if (NULL != dev->get_master_volume) {
+@@ -6896,7 +6894,6 @@ audio_module_handle_t AudioFlinger::loadHwModule_l(const char *name)
+                     mMasterVolume = mv;
+                 }
+             }
+-
+             mHardwareStatus = AUDIO_HW_GET_MASTER_MUTE;
+             if (NULL != dev->get_master_mute) {
+                 bool mm;
+@@ -6906,15 +6903,13 @@ audio_module_handle_t AudioFlinger::loadHwModule_l(const char *name)
+             }
+         }
+ #endif
+-
+         mHardwareStatus = AUDIO_HW_SET_MASTER_VOLUME;
+         if ((NULL != dev->set_master_volume) &&
+             (OK == dev->set_master_volume(dev, mMasterVolume))) {
+             flags = static_cast<AudioHwDevice::Flags>(flags |
+                     AudioHwDevice::AHWD_CAN_SET_MASTER_VOLUME);
+         }
+-
+-#ifndef ICS_AUDIO_BLOB
++#ifdef AUDIO_BLOB_NEW
+         mHardwareStatus = AUDIO_HW_SET_MASTER_MUTE;
+         if ((NULL != dev->set_master_mute) &&
+             (OK == dev->set_master_mute(dev, mMasterMute))) {
+@@ -6925,11 +6920,10 @@ audio_module_handle_t AudioFlinger::loadHwModule_l(const char *name)
+ 
+         mHardwareStatus = AUDIO_HW_IDLE;
+     }
+-
+     audio_module_handle_t handle = nextUniqueId();
+     mAudioHwDevs.add(handle, new AudioHwDevice(name, dev, flags));
+ 
+-    ALOGI("loadHwModule() Loaded %s audio interface from %s (%s) handle %d",
++    ALOGD("loadHwModule() Loaded %s audio interface from %s (%s) handle %d",
+           name, dev->common.module->name, dev->common.module->id, handle);
+ 
+     return handle;
+@@ -6962,6 +6956,7 @@ audio_io_handle_t AudioFlinger::openOutput(audio_module_handle_t module,
+                                            uint32_t *pLatencyMs,
+                                            audio_output_flags_t flags)
+ {
++    ALOGI("AudioFlinger cheshire openoutPut");
+     status_t status;
+     PlaybackThread *thread = NULL;
+     struct audio_config config = {
+@@ -6972,7 +6967,7 @@ audio_io_handle_t AudioFlinger::openOutput(audio_module_handle_t module,
+     audio_stream_out_t *outStream = NULL;
+     AudioHwDevice *outHwDev;
+ 
+-    ALOGV("openOutput(), module %d Device %x, SamplingRate %d, Format %d, Channels %x, flags %x",
++    ALOGI("openOutput(), module %d Device %x, SamplingRate %d, Format %d, Channels %x, flags %x",
+               module,
+               (pDevices != NULL) ? *pDevices : 0,
+               config.sample_rate,
+@@ -6985,14 +6980,12 @@ audio_io_handle_t AudioFlinger::openOutput(audio_module_handle_t module,
+     }
+ 
+     Mutex::Autolock _l(mLock);
+-
+     outHwDev = findSuitableHwDev_l(module, *pDevices);
+     if (outHwDev == NULL)
+         return 0;
+ 
+     audio_hw_device_t *hwDevHal = outHwDev->hwDevice();
+     audio_io_handle_t id = nextUniqueId();
+-
+     mHardwareStatus = AUDIO_HW_OUTPUT_OPEN;
+ 
+ #ifndef ICS_AUDIO_BLOB
+@@ -7012,9 +7005,8 @@ audio_io_handle_t AudioFlinger::openOutput(audio_module_handle_t module,
+     uint32_t newflags = flags | AUDIO_OUTPUT_FLAG_PRIMARY;
+     flags = (audio_output_flags_t)newflags;
+ #endif
+-
+     mHardwareStatus = AUDIO_HW_IDLE;
+-    ALOGV("openOutput() openOutputStream returned output %p, SamplingRate %d, Format %d, Channels %x, status %d",
++    ALOGI("openOutput() openOutputStream returned output %p, SamplingRate %d, Format %d, Channels %x, status %d",
+             outStream,
+             config.sample_rate,
+             config.format,
+@@ -7028,10 +7020,10 @@ audio_io_handle_t AudioFlinger::openOutput(audio_module_handle_t module,
+             (config.format != AUDIO_FORMAT_PCM_16_BIT) ||
+             (config.channel_mask != AUDIO_CHANNEL_OUT_STEREO)) {
+             thread = new DirectOutputThread(this, output, id, *pDevices);
+-            ALOGV("openOutput() created direct output: ID %d thread %p", id, thread);
++            ALOGD("openOutput() created direct output: ID %d thread %p", id, thread);
+         } else {
+             thread = new MixerThread(this, output, id, *pDevices);
+-            ALOGV("openOutput() created mixer output: ID %d thread %p", id, thread);
++            ALOGD("openOutput() created mixer output: ID %d thread %p", id, thread);
+         }
+         mPlaybackThreads.add(id, thread);
+ 
+diff --git a/services/audioflinger/AudioPolicyService.cpp b/services/audioflinger/AudioPolicyService.cpp
+index 7dd46f2..3f528f9 100644
+--- a/services/audioflinger/AudioPolicyService.cpp
++++ b/services/audioflinger/AudioPolicyService.cpp
+@@ -1347,6 +1347,7 @@ extern "C" {
+ static audio_module_handle_t aps_load_hw_module(void *service,
+                                              const char *name)
+ {
++    ALOGD("aps_load_hw_module");
+     sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
+     if (af == 0) {
+         ALOGW("%s: could not get AudioFlinger", __func__);
 diff --git a/services/camera/libcameraservice/Camera2Client.cpp b/services/camera/libcameraservice/Camera2Client.cpp
 index e59a240..201c1ff 100644
 --- a/services/camera/libcameraservice/Camera2Client.cpp

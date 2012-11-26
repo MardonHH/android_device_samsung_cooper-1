@@ -1,0 +1,73 @@
+diff --git a/include/hardware/audio.h b/include/hardware/audio.h
+index acef499..f3f364a 100644
+--- a/include/hardware/audio.h
++++ b/include/hardware/audio.h
+@@ -408,40 +408,12 @@ static inline size_t audio_stream_frame_size(const struct audio_stream *s)
+     char *tmpparam;
+     int isParamEqual;
+ 
+-#ifdef QCOM_HARDWARE
+-    if (audio_is_input_channel(chan_mask)) {
+-        chan_mask &= (AUDIO_CHANNEL_IN_STEREO | \
+-                      AUDIO_CHANNEL_IN_MONO );
+-    }
+-
+-    tmpparam = s->get_parameters(s, "voip_flag");
+-    isParamEqual = !strcmp(tmpparam,"voip_flag=1");
+-    free(tmpparam);
+-    if(isParamEqual) {
+-        if(format != AUDIO_FORMAT_PCM_8_BIT)
+-            return popcount(chan_mask) * sizeof(int16_t);
+-        else
+-            return popcount(chan_mask) * sizeof(int8_t);
+-    }
+-
+-    if (audio_is_input_channel(chan_mask)) {
+-        chan_mask &= (AUDIO_CHANNEL_IN_STEREO | \
+-                      AUDIO_CHANNEL_IN_MONO | \
+-                      AUDIO_CHANNEL_IN_5POINT1);
+-    }
+-#endif
+ 
+     switch (format) {
+ #ifdef QCOM_HARDWARE
+     case AUDIO_FORMAT_AMR_NB:
+         chan_samp_sz = 32;
+         break;
+-    case AUDIO_FORMAT_EVRC:
+-        chan_samp_sz = 23;
+-        break;
+-    case AUDIO_FORMAT_QCELP:
+-        chan_samp_sz = 35;
+-        break;
+ #endif
+     case AUDIO_FORMAT_PCM_16_BIT:
+         chan_samp_sz = sizeof(int16_t);
+diff --git a/include/hardware/hwcomposer.h b/include/hardware/hwcomposer.h
+index ac3aa42..f090e04 100644
+--- a/include/hardware/hwcomposer.h
++++ b/include/hardware/hwcomposer.h
+@@ -551,9 +551,9 @@ static inline int hwc_close_1(hwc_composer_device_1_t* device) {
+ 
+ /*****************************************************************************/
+ 
+-#if !HWC_REMOVE_DEPRECATED_VERSIONS
++//#if !HWC_REMOVE_DEPRECATED_VERSIONS
+ #include <hardware/hwcomposer_v0.h>
+-#endif
++//#endif
+ 
+ __END_DECLS
+ 
+diff --git a/modules/hwcomposer/hwcomposer.cpp b/modules/hwcomposer/hwcomposer.cpp
+index f0a5512..47cf1dd 100644
+--- a/modules/hwcomposer/hwcomposer.cpp
++++ b/modules/hwcomposer/hwcomposer.cpp
+@@ -30,7 +30,6 @@
+ 
+ struct hwc_context_t {
+     hwc_composer_device_1_t device;
+-    /* our private state goes below here */
+ };
+ 
+ static int hwc_device_open(const struct hw_module_t* module, const char* name,
