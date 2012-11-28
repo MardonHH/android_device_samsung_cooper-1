@@ -50,7 +50,7 @@ PRODUCT_PACKAGES += \
     wpa_supplicant
 
 # Telephony
-PRODUCT_PACKAGES := \
+PRODUCT_PACKAGES += \
     Mms \
     rild
 
