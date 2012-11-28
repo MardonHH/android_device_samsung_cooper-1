@@ -49,6 +49,11 @@ PRODUCT_PACKAGES += \
     sdptool \
     wpa_supplicant
 
+# Telephony
+PRODUCT_PACKAGES := \
+    Mms \
+    rild
+
 PRODUCT_PACKAGES += \
     icu.dat
 
