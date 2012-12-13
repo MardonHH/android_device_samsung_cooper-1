@@ -68,12 +68,14 @@ PRODUCT_PACKAGES += \
     Camera \
     LatinIME \
     SpareParts \
+    Superuser \
     su
 
 # Custom CM packages
 PRODUCT_PACKAGES += \
     Trebuchet \
-    audio_effects.conf
+    CMFileManager \
+    Torch
 
 # Extra tools in CM
 PRODUCT_PACKAGES += \
@@ -130,10 +132,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
   ro.modversion=$(CM_VERSION)
 
 # Bring in all audio files
-include frameworks/base/data/sounds/NewAudio.mk
-
-# Extra Ringtones
-include frameworks/base/data/sounds/AudioPackageNewWave.mk
+include frameworks/base/data/sounds/OldAudio.mk
 
 PRODUCT_PACKAGES += \
   Mms
@@ -144,7 +143,7 @@ PRODUCT_COPY_FILES += \
 
 
 # Inherit some common google stuff.
-# $(call inherit-product, vendor/google/gapps.mk)
+$(call inherit-product, device/samsung/cooper/gapps.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/samsung/cooper/full_cooper.mk)

@@ -46,6 +46,7 @@ PRODUCT_PACKAGES += \
 
 ## Camera
 PRODUCT_PACKAGES += \
+    camera.cooper \
     libcamera \
     LegacyCamera
 
@@ -55,8 +56,7 @@ PRODUCT_PACKAGES += \
     brcm_patchram_plus \
     bdaddr_read \
     setup_fs \
-    librpc \
-    FileManager
+    librpc
 
 ## Vold config
 PRODUCT_COPY_FILES += \
@@ -86,7 +86,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-    frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/base/data/etc/platform.xml:system/etc/permissions/platform.xml \
     frameworks/native/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
@@ -94,9 +93,6 @@ PRODUCT_COPY_FILES += \
 
 ## Board-specific init
 PRODUCT_COPY_FILES += \
-    device/samsung/cooper/ramdisk/lib/modules/fsr.ko:root/lib/modules/fsr.ko \
-    device/samsung/cooper/ramdisk/lib/modules/fsr_stl.ko:root/lib/modules/fsr_stl.ko \
-    device/samsung/cooper/ramdisk/lib/modules/sec_param.ko:root/lib/modules/sec_param.ko \
     device/samsung/cooper/ramdisk/COOPER.rle:root/COOPER.rle \
     device/samsung/cooper/prebuilt/lib/modules/zram.ko:system/lib/modules/zram.ko \
     device/samsung/cooper/prebuilt/lib/modules/cifs.ko:system/lib/modules/cifs.ko \
@@ -253,18 +249,12 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.setupwizard.enterprise_mode=1 \
 	ro.com.android.dateformat=MM-dd-yyyy \
 	ro.com.android.dataroaming=false \
-	ro.cm.version=CyanogenMod9.1 \
-	ro.modversion=CyanogenMod9.1
+	ro.cm.version=CyanogenMod10.1 \
+	ro.modversion=CyanogenMod10.1
 
 PRODUCT_COPY_FILES += \
 	vendor/cm/prebuilt/common/bootanimation/320.zip:system/media/bootanimation.zip \
 
-PRODUCT_COPY_FILES += \
-        device/samsung/cooper/prebuilt/etc/permissions/com.google.android.maps.xml:system/etc/permissions/com.google.android.maps.xml \
-        device/samsung/cooper/prebuilt/etc/permissions/com.google.android.media.effects.xml:system/etc/permissions/com.google.android.media.effects.xml \
-	device/samsung/cooper/prebuilt/etc/permissions/com.google.widevine.software.drm.xml:system/etc/permissions/com.google.widevine.software.drm.xml \
-        device/samsung/cooper/prebuilt/etc/g.prop:system/etc/g.prop
-
 ## GPS
 PRODUCT_COPY_FILES += \
-	device/samsung/cooper/prebuilt/system/etc/gps.conf:system/etc/gps.conf
+	device/samsung/cooper/prebuilt/etc/gps.conf:system/etc/gps.conf
