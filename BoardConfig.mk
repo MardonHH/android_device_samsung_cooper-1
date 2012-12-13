@@ -41,7 +41,7 @@ USE_CAMERA_STUB := false
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
 
-TARGET_PROVIDES_LIBRIL := device/samsung/cooper/prebuilt/system/lib/libril.so
+TARGET_PROVIDES_LIBRIL := device/samsung/cooper/prebuilt/lib/libril.so
 TARGET_PREBUILT_RECOVERY_KERNEL := device/samsung/cooper/recovery_kernel
 TARGET_RECOVERY_INITRC := device/samsung/cooper/recovery.rc
 TARGET_BOARD_PLATFORM := msm7x27
@@ -64,7 +64,7 @@ BOARD_ADRENO_DECIDE_TEXTURE_TARGET := true
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno200
 TARGET_NO_HW_VSYNC := true
 TARGET_NO_HW_OVERLAY := true
-BOARD_EGL_CFG := device/samsung/cooper/prebuilt/system/lib/egl/egl.cfg
+BOARD_EGL_CFG := device/samsung/cooper/prebuilt/lib/egl/egl.cfg
 USE_OPENGL_RENDERER := true
 
 # QCOM
