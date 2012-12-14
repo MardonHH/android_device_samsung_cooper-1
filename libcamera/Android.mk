@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 
 include $(CLEAR_VARS)
 
-##LOCAL_CFLAGS 	    += -DANDROID_JB=1 
+LOCAL_CFLAGS 	    += -DANDROID_JB=1 
 ##Uncomment previous line in JB build
 
 LOCAL_CFLAGS        += -O3
