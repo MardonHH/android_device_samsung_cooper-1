@@ -84,8 +84,6 @@ PRODUCT_PACKAGES += \
     mke2fs \
     tune2fs \
     bash \
-    vim \
-    nano \
     htop \
     powertop \
     lsof
