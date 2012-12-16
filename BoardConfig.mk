@@ -92,24 +92,11 @@ BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
 BOARD_FM_DEVICE := brcm2049
 
 # Wifi related defines
-WPA_SUPPLICANT_VERSION                  := VER_0_6_X
-WIFI_DRIVER_MODULE_NAME                 := ar6000
-WIFI_AP_DRIVER_MODULE_NAME              := ar6000
-BOARD_HAVE_SAMSUNG_WIFI                 := true
-BOARD_WEXT_NO_COMBO_SCAN                := true
-BOARD_WPA_SUPPLICANT_DRIVER             := WEXT
-WIFI_DRIVER_MODULE_ARG                  := "ifname=wlan0 fwmode=1"
-BOARD_HOSTAPD_DRIVER                    := WEXT
-WIFI_AP_DRIVER_MODULE_ARG               := "ifname=athap0 fwmode=2"
-BOARD_WLAN_DEVICE                       := ath6kl
-WIFI_DRIVER_MODULE_PATH                 := /system/wifi/ar6000.ko
-WIFI_AP_DRIVER_MODULE_PATH              := /system/wifi/ar6000.ko
-BOARD_WLAN_CHIP_AR6003                  := true
-BOARD_WLAN_ATHEROS_SDK                  := AR6kSDK.3.1/AR6kSDK.build_3.1_RC.563
-
-# Wi-Fi Hotspot
-BOARD_HAVE_LEGACY_HOSTAPD := true
-BOARD_HOSTAPD_NO_ENTROPY := true
+BOARD_WPA_SUPPLICANT_DRIVER := AR6000
+WPA_SUPPLICANT_VERSION := VER_0_6_X
+BOARD_WLAN_DEVICE := wlan0
+WIFI_DRIVER_MODULE_PATH := /system/wifi/ar6000.ko
+WIFI_DRIVER_MODULE_NAME := ar6000
 
 # RIL
 BOARD_USES_LEGACY_RIL := true
