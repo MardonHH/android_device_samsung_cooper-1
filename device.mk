@@ -45,8 +45,8 @@ PRODUCT_PACKAGES += \
 
 ## Camera
 PRODUCT_PACKAGES += \
-    camera.cooper \
-    libcamera \
+##    camera.cooper \
+##    libcamera \
     LegacyCamera
 
 # Other
@@ -92,6 +92,9 @@ PRODUCT_COPY_FILES += \
 
 ## Board-specific init
 PRODUCT_COPY_FILES += \
+    device/samsung/cooper/ramdisk/lib/modules/fsr.ko:root/lib/modules/fsr.ko \
+    device/samsung/cooper/ramdisk/lib/modules/fsr_stl.ko:root/lib/modules/fsr_stl.ko \
+    device/samsung/cooper/ramdisk/lib/modules/sec_param.ko:root/lib/modules/sec_param.ko \
     device/samsung/cooper/ramdisk/COOPER.rle:root/COOPER.rle \
     device/samsung/cooper/prebuilt/lib/modules/zram.ko:system/lib/modules/zram.ko \
     device/samsung/cooper/prebuilt/lib/modules/cifs.ko:system/lib/modules/cifs.ko \
