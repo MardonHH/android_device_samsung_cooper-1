@@ -1,18 +1,17 @@
 import init.gt-s5830board.usb.rc
 
 on init
-    #insmod /lib/modules/rfs_fat.ko
-    #insmod /lib/modules/rfs_glue.ko
     insmod /lib/modules/fsr.ko
     insmod /lib/modules/fsr_stl.ko
     insmod /lib/modules/sec_param.ko
 
 on early-init
-
-   export EXTERNAL_STORAGE /mnt/sdcard
-   mkdir /mnt/sdcard 0000 system system
-   # for backwards compatibility
-   symlink /mnt/sdcard /sdcard
+    # sdcard
+    mkdir /storage 0775 system sdcard_r
+    mkdir /storage/sdcard0 0000 system system
+    symlink /storage/sdcard0 /mnt/sdcard
+    symlink /storage/sdcard0 /sdcard
+    export EXTERNAL_STORAGE /storage/sdcard0
 
     # sd-ext
     mkdir /sd-ext 0771 system system
