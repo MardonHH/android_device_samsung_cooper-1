@@ -122,9 +122,7 @@ PRODUCT_COPY_FILES += \
 ## Wifi Stuff
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
-    device/samsung/cooper/prebuilt/etc/wifi/hostapd.conf:system/etc/wifi/hostapd.conf \
-    device/samsung/cooper/prebuilt/etc/wifi/dhcpcd.conf:system/etc/wifi/dhcpcd.conf \
-    device/samsung/cooper/prebuilt/etc/dhcpcd/dhcpcd.conf:system/etc/dhcpcd/dhcpcd.conf
+    device/samsung/cooper/prebuilt/etc/wifi/hostapd.conf:system/etc/wifi/hostapd.conf
 
 ## Media
 PRODUCT_COPY_FILES += \
