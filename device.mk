@@ -46,8 +46,7 @@ PRODUCT_PACKAGES += \
 ## Camera
 PRODUCT_PACKAGES += \
     camera.cooper \
-    libcamera \
-    LegacyCamera
+    libcamera
 
 # Other
 PRODUCT_PACKAGES += \
