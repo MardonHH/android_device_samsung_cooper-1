@@ -257,7 +257,7 @@ static void wrap_data_callback_timestamp(nsecs_t timestamp, int32_t msg_type, co
 
 void CameraHAL_FixupParams(android::CameraParameters &camParams)
 {
-    const char *video_sizes				= "640x480,384x288,352x288,320x240,240x160,176x144";
+    const char *video_sizes			= "640x480,384x288,352x288,320x240,240x160,176x144";
     const char *preferred_size			= "320x240";
     const char *preview_frame_rates		= "25,24,15";
 
@@ -278,9 +278,8 @@ void CameraHAL_FixupParams(android::CameraParameters &camParams)
     if (!camParams.get(CameraParameters::KEY_VIDEO_SIZE)) {
          camParams.set(CameraParameters::KEY_VIDEO_SIZE, preferred_size);
     }
-	
-    camParams.set(CameraParameters::KEY_MAX_EXPOSURE_COMPENSATION, 4);
-    camParams.set(CameraParameters::KEY_MIN_EXPOSURE_COMPENSATION, -4);
+    camParams.set(CameraParameters::KEY_MAX_EXPOSURE_COMPENSATION, 3);
+    camParams.set(CameraParameters::KEY_MIN_EXPOSURE_COMPENSATION, -3);
     camParams.set(CameraParameters::KEY_EXPOSURE_COMPENSATION_STEP, 1);
 }
 
