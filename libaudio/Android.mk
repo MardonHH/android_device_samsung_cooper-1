@@ -1,11 +1,12 @@
 
 ifneq ($(BUILD_TINY_ANDROID),true)
+ifeq ($(TARGET_PROVIDES_LIBAUDIO), true)
 
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := audio_policy.cooper
+LOCAL_MODULE := audio_policy.$(TARGET_BOARD_PLATFORM)
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 LOCAL_STATIC_LIBRARIES := libmedia_helper
 LOCAL_WHOLE_STATIC_LIBRARIES := libaudiopolicy_legacy    
@@ -26,7 +27,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := audio.primary.cooper
+LOCAL_MODULE := audio.primary.$(TARGET_BOARD_PLATFORM)
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw	
 LOCAL_STATIC_LIBRARIES += libmedia_helper	
 LOCAL_WHOLE_STATIC_LIBRARIES := libaudiohw_legacy
@@ -49,4 +50,5 @@ endif
 
 include $(BUILD_SHARED_LIBRARY)
 
+endif # TARGET_PROVIDES_LIBAUDIO
 endif # not BUILD_TINY_ANDROID
