@@ -137,3 +137,6 @@ $(call inherit-product, device/samsung/cooper/gapps.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/samsung/cooper/full_cooper.mk)
+
+PRODUCT_NAME  := cm_cooper
+PRODUCT_DEVICE  := cooper
