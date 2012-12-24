@@ -1,9 +1,6 @@
 ## Specify phone tech before including full_phone
 $(call inherit-product, vendor/cm/config/gsm.mk)
 
-# Inherit some common CM stuff.
-PRODUCT_BRAND ?= cyanogenmod
-
 ifdef CM_NIGHTLY
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.rommanager.developerid=cyanogenmodnightly
@@ -49,11 +46,6 @@ PRODUCT_COPY_FILES += \
     vendor/cm/prebuilt/common/etc/init.local.rc:system/etc/init.local.rc \
     vendor/cm/prebuilt/common/bin/compcache:system/bin/compcache \
     vendor/cm/prebuilt/common/bin/handle_compcache:system/bin/handle_compcache
-
-# Bring in camera effects
-PRODUCT_COPY_FILES +=  \
-    vendor/cm/prebuilt/common/media/LMprec_508.emd:system/media/LMprec_508.emd \
-    vendor/cm/prebuilt/common/media/PFFprec_600.emd:system/media/PFFprec_600.emd
 
 # This is CM!
 PRODUCT_COPY_FILES += \
@@ -145,6 +137,3 @@ $(call inherit-product, device/samsung/cooper/gapps.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/samsung/cooper/full_cooper.mk)
-
-PRODUCT_NAME	:= cm_cooper
-PRODUCT_DEVICE	:= cooper

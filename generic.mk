@@ -64,7 +64,7 @@ PRODUCT_PACKAGES += \
     local_time.default
 
 PRODUCT_COPY_FILES := \
-        frameworks/av/media/libeffects/data/audio_effects.conf:system/etc/audio_effects.conf
+    frameworks/av/media/libeffects/data/audio_effects.conf:system/etc/audio_effects.conf
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.carrier=unknown
@@ -72,8 +72,3 @@ PRODUCT_PROPERTY_OVERRIDES += \
 $(call inherit-product-if-exists, frameworks/base/data/fonts/fonts.mk)
 $(call inherit-product-if-exists, frameworks/base/data/keyboards/keyboards.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core.mk)
-
-# Overrides
-PRODUCT_BRAND := generic
-PRODUCT_DEVICE := generic
-PRODUCT_NAME := generic

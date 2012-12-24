@@ -76,7 +76,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
     frameworks/native/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
-    frameworks/native/data/etc/android.hardware.location.xml:system/etc/permissions/android.hardware.location.xml \
     frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
     frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
     frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
@@ -84,8 +83,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.distinct.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.distinct.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
-    frameworks/base/data/etc/platform.xml:system/etc/permissions/platform.xml \
-    frameworks/native/data/etc/android.software.sip.xml:system/etc/permissions/android.software.sip.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
 
@@ -219,7 +216,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/cooper/prebuilt/bin/get_macaddrs:system/bin/get_macaddrs \
     device/samsung/cooper/prebuilt/lib/hw/lights.default.so:system/lib/hw/lights.default.so \
-    device/samsung/cooper/prebuilt/lib/hw/gps.msm7x27.so:system/lib/hw/gps.msm7x27.so
 
 ## ril
 PRODUCT_COPY_FILES += \
@@ -234,7 +230,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.com.android.dateformat=dd-MM-yyyy \
 
 # LDPI assets
-PRODUCT_LOCALES += en
+PRODUCT_LOCALES += ru_RU
 PRODUCT_AAPT_CONFIG := normal ldpi mdpi
 PRODUCT_AAPT_PREF_CONFIG := mdpi
 
