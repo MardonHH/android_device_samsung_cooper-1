@@ -84,9 +84,10 @@ TARGET_OTA_ASSERT_DEVICE := cooper,GT-S5830
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
-BOARD_HAVE_BLUETOOTH_BCM := true
 BOARD_HAVE_SAMSUNG_BLUETOOTH := true
-BOARD_BLUETOOTH_LIBBT_VNDCFG := device/samsung/cooper/libbt_vndcfg.txt
+BOARD_HAVE_BLUETOOTH_BCM := true
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/cooper/bluetooth
+BOARD_BLUEDROID_VENDOR_CONF := device/samsung/cooper/bluetooth/vnd_samsung.txt
 
 # FM
 BOARD_HAVE_FM_RADIO := true
