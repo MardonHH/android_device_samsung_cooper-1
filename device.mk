@@ -38,14 +38,14 @@ PRODUCT_PACKAGES += \
 
 ## Audio
 PRODUCT_PACKAGES += \
-    audio_policy.cooper \
-    audio.primary.cooper \
+    audio_policy.msm7x27 \
+    audio.primary.msm7x27 \
     libaudioutils \
     libcyanogen-dsp
 
 ## Camera
 PRODUCT_PACKAGES += \
-    camera.cooper \
+    camera.msm7x27 \
     libcamera
 
 # Other
