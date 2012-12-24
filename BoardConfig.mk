@@ -112,6 +112,7 @@ BOARD_HOSTAPD_NO_ENTROPY := true
 # RIL
 BOARD_USES_LEGACY_RIL := true
 BOARD_MOBILEDATA_INTERFACE_NAME := "pdp0"
+BOARD_RIL_CLASS := ../../../device/samsung/cooper/ril/
 
 # GPS
 BOARD_USES_QCOM_LIBRPC := true
